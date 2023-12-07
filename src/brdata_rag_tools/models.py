@@ -25,22 +25,17 @@ class Generator:
     :type model: LLMName
     :param token: The API token to access the language model. If not provided, the token will be fetched based on the model value.
     :type token: str, optional
-    :param temperature: The temperature parameter for text generation. A higher value (e.g., 1.0) makes the output more random, while a lower value (e.g., 0.2) makes it more focused and
-    * deterministic. If not provided, the default model's temperature will be used.
+    :param temperature: The temperature parameter for text generation. A higher value (e.g., 1.0) makes the output more random, while a lower value (e.g., 0.2) makes it more focused and deterministic. If not provided, the default model's temperature will be used.
     :type temperature: float, optional
     :param max_new_tokens: The maximum number of new tokens to generate. If not provided, the default model's maximum new tokens value will be used.
     :type max_new_tokens: int, optional
-    :param top_p: The top-p probability threshold for text generation. Only tokens with cumulative probability less than or equal to the threshold will be considered. If not provided, the
-    * default model's top-p value will be used.
+    :param top_p: The top-p probability threshold for text generation. Only tokens with cumulative probability less than or equal to the threshold will be considered. If not provided, the default model's top-p value will be used.
     :type top_p: float, optional
-    :param top_k: The top-k number of tokens to consider for text generation. Only the k most probable tokens will be considered. If not provided, the default model's top-k value will be
-    * used.
+    :param top_k: The top-k number of tokens to consider for text generation. Only the k most probable tokens will be considered. If not provided, the default model's top-k value will be used.
     :type top_k: int, optional
-    :param length_penalty: The length penalty factor. It determines how much influence the length of the generated text has on the probability distribution. A higher value (e.g., 0.8) encourages
-    * generating shorter text, while a lower value (e.g., 1.2) encourages longer text. If not provided, the default model's length penalty value will be used.
+    :param length_penalty: The length penalty factor. It determines how much influence the length of the generated text has on the probability distribution. A higher value (e.g., 0.8) encourages generating shorter text, while a lower value (e.g., 1.2) encourages longer text. If not provided, the default model's length penalty value will be used.
     :type length_penalty: float, optional
-    :param number_of_responses: The number of responses to generate. If set, the generator will return a list of responses instead of a single response. If not provided, the generator will
-    * return a single response.
+    :param number_of_responses: The number of responses to generate. If set, the generator will return a list of responses instead of a single response. If not provided, the generator will return a single response.
     :type number_of_responses: int, optional
 
     :ivar model: The language model to be used for text generation.

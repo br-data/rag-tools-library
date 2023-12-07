@@ -10,21 +10,23 @@ from datastructures import BaseClass
 
 class EmbeddingType(Enum):
     """
-    The EmbeddingType class is an enumeration that represents different types of embeddings. It is used to define the type of embedding model to be used in a text processing task.
+    The EmbeddingType class is an enumeration that represents different types of embeddings.
+    It is used to define the type of embedding model to be used in a text processing task.
 
-    Attributes:
-        SENTENCE_TRANSFORMERS (EmbeddingType): Represents the Sentence Transformers embedding model.
-        TF_IDF (EmbeddingType): Represents the TF-IDF embedding model.
-        TEST (EmbeddingType): Represents a test embedding model.
+    ### Attributes:
 
-    Methods:
-        dimension: Returns the dimension of the embedding model.
-        model: Returns an instance of the specified embedding model.
+    - SENTENCE_TRANSFORMERS (EmbeddingType): Represents the Sentence Transformers embedding model.
+    - TF_IDF (EmbeddingType): Represents the TF-IDF embedding model.
+    - TEST (EmbeddingType): Represents a test embedding model.
 
-    Example Usage:
+    Example Usage::
+
+        import test
+
         embedding_type = EmbeddingType.SENTENCE_TRANSFORMERS
         dimension = embedding_type.dimension
         model = embedding_type.model
+
     """
     SENTENCE_TRANSFORMERS = "sentence_transformers"
     TF_IDF = "tfidf"

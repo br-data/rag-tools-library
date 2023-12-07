@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to brdata-rag-tools’s documentation! &mdash; brdata-rag-tools 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            brdata-rag-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to brdata-rag-tools’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#module-models">Models</a><ul>
+<li><a class="reference internal" href="#models.Generator"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a><ul>
+<li><a class="reference internal" href="#models.Generator.get_token"><code class="docutils literal notranslate"><span class="pre">Generator.get_token()</span></code></a></li>
+<li><a class="reference internal" href="#models.Generator.prompt"><code class="docutils literal notranslate"><span class="pre">Generator.prompt()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#models.GeneratorFactory"><code class="docutils literal notranslate"><span class="pre">GeneratorFactory</span></code></a></li>
+<li><a class="reference internal" href="#models.IGEL"><code class="docutils literal notranslate"><span class="pre">IGEL</span></code></a><ul>
+<li><a class="reference internal" href="#models.IGEL.prompt"><code class="docutils literal notranslate"><span class="pre">IGEL.prompt()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#models.LLM"><code class="docutils literal notranslate"><span class="pre">LLM</span></code></a><ul>
+<li><a class="reference internal" href="#models.LLM.prompt"><code class="docutils literal notranslate"><span class="pre">LLM.prompt()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#models.LLMName"><code class="docutils literal notranslate"><span class="pre">LLMName</span></code></a></li>
+<li><a class="reference internal" href="#models.OpenAI"><code class="docutils literal notranslate"><span class="pre">OpenAI</span></code></a><ul>
+<li><a class="reference internal" href="#models.OpenAI.prompt"><code class="docutils literal notranslate"><span class="pre">OpenAI.prompt()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#databases">Databases</a><ul>
+<li><a class="reference internal" href="#databases.PGVector"><code class="docutils literal notranslate"><span class="pre">PGVector</span></code></a><ul>
+<li><a class="reference internal" href="#databases.PGVector.create_abstract_embedding_table"><code class="docutils literal notranslate"><span class="pre">PGVector.create_abstract_embedding_table()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.create_tables"><code class="docutils literal notranslate"><span class="pre">PGVector.create_tables()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.drop_table"><code class="docutils literal notranslate"><span class="pre">PGVector.drop_table()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.get_ids_with_embedding"><code class="docutils literal notranslate"><span class="pre">PGVector.get_ids_with_embedding()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.retrieve_embedding"><code class="docutils literal notranslate"><span class="pre">PGVector.retrieve_embedding()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.retrieve_similar_content"><code class="docutils literal notranslate"><span class="pre">PGVector.retrieve_similar_content()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.session"><code class="docutils literal notranslate"><span class="pre">PGVector.session()</span></code></a></li>
+<li><a class="reference internal" href="#databases.PGVector.write_rows"><code class="docutils literal notranslate"><span class="pre">PGVector.write_rows()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-embeddings">Embeddings</a><ul>
+<li><a class="reference internal" href="#embeddings.Embedder"><code class="docutils literal notranslate"><span class="pre">Embedder</span></code></a></li>
+<li><a class="reference internal" href="#embeddings.EmbeddingType"><code class="docutils literal notranslate"><span class="pre">EmbeddingType</span></code></a><ul>
+<li><a class="reference internal" href="#embeddings.EmbeddingType.dimension"><code class="docutils literal notranslate"><span class="pre">EmbeddingType.dimension</span></code></a></li>
+<li><a class="reference internal" href="#embeddings.EmbeddingType.model"><code class="docutils literal notranslate"><span class="pre">EmbeddingType.model</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#embeddings.SentenceTransformer"><code class="docutils literal notranslate"><span class="pre">SentenceTransformer</span></code></a><ul>
+<li><a class="reference internal" href="#embeddings.SentenceTransformer.create_embedding"><code class="docutils literal notranslate"><span class="pre">SentenceTransformer.create_embedding()</span></code></a></li>
+<li><a class="reference internal" href="#embeddings.SentenceTransformer.create_embedding_bulk"><code class="docutils literal notranslate"><span class="pre">SentenceTransformer.create_embedding_bulk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#embeddings.Test"><code class="docutils literal notranslate"><span class="pre">Test</span></code></a><ul>
+<li><a class="reference internal" href="#embeddings.Test.create_embedding"><code class="docutils literal notranslate"><span class="pre">Test.create_embedding()</span></code></a></li>
+<li><a class="reference internal" href="#embeddings.Test.create_embedding_bulk"><code class="docutils literal notranslate"><span class="pre">Test.create_embedding_bulk()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">brdata-rag-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to brdata-rag-tools’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-brdata-rag-tools-s-documentation">
+<h1>Welcome to brdata-rag-tools’s documentation!<a class="headerlink" href="#welcome-to-brdata-rag-tools-s-documentation" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+<section id="module-models">
+<span id="models"></span><h1>Models<a class="headerlink" href="#module-models" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Generator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.LLMName" title="models.LLMName"><span class="pre">LLMName</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_new_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.Generator" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Class<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Generator</p>
+</dd>
+</dl>
+<p>This class represents a generator for text generation using language models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="#models.LLMName" title="models.LLMName"><em>LLMName</em></a>) – The language model to be used for text generation.</p></li>
+<li><p><strong>token</strong> (<em>str</em><em>, </em><em>optional</em>) – The API token to access the language model. If not provided, the token will be fetched based on the model value.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em><em>, </em><em>optional</em>) – The temperature parameter for text generation. A higher value (e.g., 1.0) makes the output more random, while a lower value (e.g., 0.2) makes it more focused and deterministic. If not provided, the default model’s temperature will be used.</p></li>
+<li><p><strong>max_new_tokens</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum number of new tokens to generate. If not provided, the default model’s maximum new tokens value will be used.</p></li>
+<li><p><strong>top_p</strong> (<em>float</em><em>, </em><em>optional</em>) – The top-p probability threshold for text generation. Only tokens with cumulative probability less than or equal to the threshold will be considered. If not provided, the default model’s top-p value will be used.</p></li>
+<li><p><strong>top_k</strong> (<em>int</em><em>, </em><em>optional</em>) – The top-k number of tokens to consider for text generation. Only the k most probable tokens will be considered. If not provided, the default model’s top-k value will be used.</p></li>
+<li><p><strong>length_penalty</strong> (<em>float</em><em>, </em><em>optional</em>) – The length penalty factor. It determines how much influence the length of the generated text has on the probability distribution. A higher value (e.g., 0.8) encourages generating shorter text, while a lower value (e.g., 1.2) encourages longer text. If not provided, the default model’s length penalty value will be used.</p></li>
+<li><p><strong>number_of_responses</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of responses to generate. If set, the generator will return a list of responses instead of a single response. If not provided, the generator will return a single response.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="#models.LLMName" title="models.LLMName"><em>LLMName</em></a>) – The language model to be used for text generation.</p></li>
+<li><p><strong>token</strong> (<em>str</em>) – The API token to access the language model.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – The temperature parameter for text generation.</p></li>
+<li><p><strong>max_new_tokens</strong> (<em>int</em>) – The maximum number of new tokens to generate.</p></li>
+<li><p><strong>top_p</strong> (<em>float</em>) – The top-p probability threshold for text generation.</p></li>
+<li><p><strong>top_k</strong> (<em>int</em>) – The top-k number of tokens to consider for text generation.</p></li>
+<li><p><strong>length_penalty</strong> (<em>float</em>) – The length penalty factor.</p></li>
+<li><p><strong>number_of_responses</strong> (<em>int</em>) – The number of responses to generate.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Generator.get_token">
+<span class="sig-name descname"><span class="pre">get_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#models.Generator.get_token" title="Link to this definition"></a></dt>
+<dd><p>Returns the given token or retrieves the appropriate token based on the model value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<em>str</em>) – The token to be used for authentication.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The retrieved token or the given token.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If no token is provided for the model value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Generator.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#models.Generator.prompt" title="Link to this definition"></a></dt>
+<dd><p>Prompts the user with a prompt string and returns the user’s input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prompt</strong> (<em>str</em>) – The prompt string to display to the user.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The user’s input as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.GeneratorFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">GeneratorFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.LLMName" title="models.LLMName"><span class="pre">LLMName</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.GeneratorFactory" title="Link to this definition"></a></dt>
+<dd><p>The <cite>GeneratorFactory</cite> class is responsible for creating instances of different generator classes based on the provided model name.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.IGEL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">IGEL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.IGEL" title="Link to this definition"></a></dt>
+<dd><p>A class representing the IGEL generator.</p>
+<p>The IGEL generator is a type of generator that uses the LLMName.IGEL model to generate text.
+It accepts a token for authentication and various parameters that control the generation process.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>token (str, optional): A token for authentication. Defaults to None.</p>
+</dd>
+<dt>Attributes:</dt><dd><p>model (LLMName): The model used by the IGEL generator.
+token (str): The token used for authentication.
+temperature (float): The temperature parameter for generation.
+max_new_tokens (int): The maximum number of new tokens to generate.
+top_p (float): The top-p parameter for generation.
+length_penalty (float): The length penalty parameter for generation.</p>
+</dd>
+<dt>Methods:</dt><dd><p>prompt(prompt: str) -&gt; str: Generates text based on the provided prompt.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.IGEL.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.IGEL.prompt" title="Link to this definition"></a></dt>
+<dd><p>Prompts the user with a prompt string and returns the user’s input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prompt</strong> (<em>str</em>) – The prompt string to display to the user.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The user’s input as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.LLM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">LLM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.LLMName" title="models.LLMName"><span class="pre">LLMName</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.LLM" title="Link to this definition"></a></dt>
+<dd><p>Class representing a Language Model.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>model_name (LLMName): The name of the language model.
+token (str, optional): The API token for the language model. Defaults to None.</p>
+</dd>
+<dt>Attributes:</dt><dd><p>model_name (LLMName): The name of the language model.
+token (str): The API token for the language model.
+model (Generator): The language model generator.</p>
+</dd>
+<dt>Methods:</dt><dd><p>prompt: Generate text based on the given prompt.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.LLM.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#models.LLM.prompt" title="Link to this definition"></a></dt>
+<dd><p>Prompt the model with a given prompt and return the generated output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prompt</strong> (<em>str</em>) – The prompt string to provide to the model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated output from the model in response to the given prompt.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.LLMName">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">LLMName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.LLMName" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.OpenAI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">OpenAI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.LLMName" title="models.LLMName"><span class="pre">LLMName</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.OpenAI" title="Link to this definition"></a></dt>
+<dd><p>Create text from OpenAI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="#models.LLMName" title="models.LLMName"><em>LLMName</em></a>) – The name of the language model to use.</p></li>
+<li><p><strong>token</strong> (<em>str</em>) – The API token for accessing the OpenAI API.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.OpenAI.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#models.OpenAI.prompt" title="Link to this definition"></a></dt>
+<dd><p>Generate with gpt model family.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="databases">
+<h1>Databases<a class="headerlink" href="#databases" title="Link to this heading"></a></h1>
+<p>Databases are vector databases for similarity search. Right now, only PGVector databases are supported.</p>
+<dl class="py class" id="module-databases">
+<dt class="sig sig-object py" id="databases.PGVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">databases.</span></span><span class="sig-name descname"><span class="pre">PGVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'postgres'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'postgres'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5432</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector" title="Link to this definition"></a></dt>
+<dd><p>This class represents a connection to a PostgreSQL database with the pgvector addon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<em>str</em>) – The username to connect to the database. Default is “postgres”.</p></li>
+<li><p><strong>database</strong> (<em>str</em>) – The name of the database to connect to. Default is “postgres”.</p></li>
+<li><p><strong>password</strong> (<em>str</em>) – The password to connect to the database. If not provided, it will use the value of the “DATABASE_PASSWORD” environment variable.</p></li>
+<li><p><strong>host</strong> (<em>str</em>) – The host address of the database. Default is “localhost”.</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – The port number of the database. Default is 5432.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Whether to enable verbose output. Default is False.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.create_abstract_embedding_table">
+<span class="sig-name descname"><span class="pre">create_abstract_embedding_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#embeddings.EmbeddingType" title="embeddings.EmbeddingType"><span class="pre">EmbeddingType</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.create_abstract_embedding_table" title="Link to this definition"></a></dt>
+<dd><p>Create an abstract embedding table. Use it to inherit your own database tables to use with the PGVector class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>embed_type</strong> – The type of embedding to be used.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The abstract embedding table class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.create_tables">
+<span class="sig-name descname"><span class="pre">create_tables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.create_tables" title="Link to this definition"></a></dt>
+<dd><p>Create tables in the database based on the defined metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.drop_table">
+<span class="sig-name descname"><span class="pre">drop_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.drop_table" title="Link to this definition"></a></dt>
+<dd><p>Drop a table from the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the table to be dropped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.get_ids_with_embedding">
+<span class="sig-name descname"><span class="pre">get_ids_with_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseClass</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.get_ids_with_embedding" title="Link to this definition"></a></dt>
+<dd><p>Get the IDs from the given table using the provided embedding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>table</strong> (<em>BaseClass</em>) – The table to query the IDs from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of IDs from the provided table.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.retrieve_embedding">
+<span class="sig-name descname"><span class="pre">retrieve_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseClass</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#databases.PGVector.retrieve_embedding" title="Link to this definition"></a></dt>
+<dd><p>Retrieve embedding from the database for a given row ID and table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_id</strong> – The ID of the row to retrieve the embedding from.</p></li>
+<li><p><strong>table</strong> – The table containing the embedding column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The retrieved embedding as a numpy array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.retrieve_similar_content">
+<span class="sig-name descname"><span class="pre">retrieve_similar_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseClass</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#embeddings.EmbeddingType" title="embeddings.EmbeddingType"><span class="pre">EmbeddingType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.retrieve_similar_content" title="Link to this definition"></a></dt>
+<dd><p>Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
+and queries the associated database for the most similar matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt</strong> – The prompt for which similar content needs to be found.</p></li>
+<li><p><strong>table</strong> – The table in which the content is stored.</p></li>
+<li><p><strong>embedding_type</strong> – The type of embedding to be used.</p></li>
+<li><p><strong>limit</strong> – The maximum number of similar content to be retrieved (default: 50).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of results containing similar content.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.session">
+<span class="sig-name descname"><span class="pre">session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.session" title="Link to this definition"></a></dt>
+<dd><p>Initiates a new session with the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Session object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="databases.PGVector.write_rows">
+<span class="sig-name descname"><span class="pre">write_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseClass</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_embeddings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#databases.PGVector.write_rows" title="Link to this definition"></a></dt>
+<dd><p>Write rows to the database and optionally create embeddings for the rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rows</strong> – A list of rows to be written to the database. Rows must be instances of BaseClass or its subclasses.</p></li>
+<li><p><strong>create_embeddings</strong> – A boolean value indicating whether embeddings should be created for the rows.
+Default value is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-embeddings">
+<span id="embeddings"></span><h1>Embeddings<a class="headerlink" href="#module-embeddings" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="embeddings.Embedder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">embeddings.</span></span><span class="sig-name descname"><span class="pre">Embedder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#embeddings.Embedder" title="Link to this definition"></a></dt>
+<dd><p>The Embedder class is responsible for creating embeddings for a list of objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endpoint</strong> (<em>str</em>) – The endpoint for the embedding service.</p></li>
+<li><p><strong>dimension</strong> (<em>int</em>) – The dimension of the embeddings to be created.</p></li>
+<li><p><strong>token</strong> (<em>str</em><em>, </em><em>optional</em>) – The access token for the embedding service (optional).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p>NotImplementedError</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="embeddings.EmbeddingType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">embeddings.</span></span><span class="sig-name descname"><span class="pre">EmbeddingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#embeddings.EmbeddingType" title="Link to this definition"></a></dt>
+<dd><p>The EmbeddingType class is an enumeration that represents different types of embeddings.
+It is used to define the type of embedding model to be used in a text processing task.</p>
+<p>### Attributes:</p>
+<ul class="simple">
+<li><p>SENTENCE_TRANSFORMERS (EmbeddingType): Represents the Sentence Transformers embedding model.</p></li>
+<li><p>TF_IDF (EmbeddingType): Represents the TF-IDF embedding model.</p></li>
+<li><p>TEST (EmbeddingType): Represents a test embedding model.</p></li>
+</ul>
+<p>Example Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">test</span>
+
+<span class="n">embedding_type</span> <span class="o">=</span> <span class="n">EmbeddingType</span><span class="o">.</span><span class="n">SENTENCE_TRANSFORMERS</span>
+<span class="n">dimension</span> <span class="o">=</span> <span class="n">embedding_type</span><span class="o">.</span><span class="n">dimension</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">embedding_type</span><span class="o">.</span><span class="n">model</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="embeddings.EmbeddingType.dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimension</span></span><a class="headerlink" href="#embeddings.EmbeddingType.dimension" title="Link to this definition"></a></dt>
+<dd><p>Get the dimension of the input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The dimension of the input.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="embeddings.EmbeddingType.model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#embeddings.EmbeddingType.model" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An instance of the used language model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="embeddings.SentenceTransformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">embeddings.</span></span><span class="sig-name descname"><span class="pre">SentenceTransformer</span></span><a class="headerlink" href="#embeddings.SentenceTransformer" title="Link to this definition"></a></dt>
+<dd><p>Class representing a sentence transformer for creating sentence embeddings.</p>
+<dl>
+<dt>Methods:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>create_embedding(text: str) -&gt; np.array:</dt><dd><p>Takes a string of text and returns its corresponding sentence embedding.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>create_embedding_bulk(rows: List[Type[BaseClass]]) -&gt; List[Type[BaseClass]]:</dt><dd><p>Takes a list of rows as input and creates sentence embeddings for each row. It updates
+the ‘embedding’ attribute of each row in the list and returns the updated list.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="simple">
+<dt>Raises:</dt><dd><ul class="simple">
+<li><p>NotImplementedError: Raised when more than 250 rows are passed to the create_embedding_bulk method.</p></li>
+<li><p>ValueError: Raised when there is an ID mismatch during the bulk embedding creation process.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="embeddings.SentenceTransformer.create_embedding">
+<span class="sig-name descname"><span class="pre">create_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#embeddings.SentenceTransformer.create_embedding" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> – The text to be embedded.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array representing the embedding of the text.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="embeddings.SentenceTransformer.create_embedding_bulk">
+<span class="sig-name descname"><span class="pre">create_embedding_bulk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseClass</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseClass</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#embeddings.SentenceTransformer.create_embedding_bulk" title="Link to this definition"></a></dt>
+<dd><p>Create embeddings for a list of rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rows</strong> (<em>List</em><em>[</em><em>Type</em><em>[</em><em>BaseClass</em><em>]</em><em>]</em>) – A list of rows to create embeddings for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of rows with embeddings added.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Type[BaseClass]]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NotImplementedError</strong> – If the number of rows is greater than 250.</p></li>
+<li><p><strong>ValueError</strong> – If there is a mismatch in ID between the rows and the response.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="embeddings.Test">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">embeddings.</span></span><span class="sig-name descname"><span class="pre">Test</span></span><a class="headerlink" href="#embeddings.Test" title="Link to this definition"></a></dt>
+<dd><p>This class represents a Test class that inherits from Embedder class.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>None</p>
+</dd>
+<dt>Attributes:</dt><dd><p>None</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="embeddings.Test.create_embedding">
+<span class="sig-name descname"><span class="pre">create_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#embeddings.Test.create_embedding" title="Link to this definition"></a></dt>
+<dd><p>Create an embedding for the given text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The text to create an embedding for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 3-dimensional numpy array with the values 1, 2 and 3.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="embeddings.Test.create_embedding_bulk">
+<span class="sig-name descname"><span class="pre">create_embedding_bulk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseClass</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseClass</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#embeddings.Test.create_embedding_bulk" title="Link to this definition"></a></dt>
+<dd><p>Create embeddings for a list of rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rows</strong> – A list of rows, each row should be an instance of the BaseClass.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of rows with updated embeddings.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the endpoint of any row does not match the current endpoint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marco Lehner.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
