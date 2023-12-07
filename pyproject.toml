@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brdata-rag-tools"
+version = "0.0.1"
+authors = [
+  { name="Marco Lehner", email="marco.lehner@br.de" },
+]
+description = "Improve development of retrieval augmented generation (RAG) applications at the BR AI + Automation Lab."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/br-data/rag-tools-library"
+Issues = "https://github.com/br-data/rag-tools-library/issues"
