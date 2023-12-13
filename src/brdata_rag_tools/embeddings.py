@@ -41,7 +41,7 @@ class EmbeddingType(Enum):
         :rtype: int
         """
         if self == self.SENTENCE_TRANSFORMERS:
-            return 1024
+            return SentenceTransformer().dimension
         if self == self.TF_IDF:
             return 768
         if self == self.TEST:
@@ -68,7 +68,7 @@ class Embedder:
     :type endpoint: str
     :param dimension: The dimension of the embeddings to be created.
     :type dimension: int
-    :param token: The access token for the embedding service (optional).
+    :param token: The access auth_token for the embedding service (optional).
     :type token: str, optional
 
     :raises: NotImplementedError
@@ -76,10 +76,12 @@ class Embedder:
     :return: None
     """
 
-    def __init__(self, endpoint: str, dimension: int, token: Optional[str] = None):
+    def __init__(self, endpoint: str, dimension: int, token: Optional[str] = None, max_prompt_tokens: Optional[int] = None):
         self.endpoint = endpoint
         self.dimension = dimension
         self.token = token
+        self.max_prompt_tokens = max_prompt_tokens
+
 
     def create_embedding_bulk(self, rows: List[Type[BaseClass]]) -> List[
         Type[BaseClass]]:
@@ -87,6 +89,7 @@ class Embedder:
 
     def create_embedding(self, text: str) -> np.array:
         raise NotImplementedError()
+
 
 
 class SentenceTransformer(Embedder):
@@ -107,8 +110,8 @@ class SentenceTransformer(Embedder):
     """
 
     def __init__(self):
-        super().__init__("localhost:3000", 1024,
-                         os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
+        super().__init__(endpoint= "https://gbert-cosine-embeddings.brdata-dev.de", dimension=1024,
+                         token = os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
 
     def create_embedding(self, text: str) -> np.array:
         """
@@ -128,7 +131,7 @@ class SentenceTransformer(Embedder):
             }]
         }
 
-        response = requests.post('http://localhost:3000/create_embeddings',
+        response = requests.post(f'{self.endpoint}/create_embeddings',
                                  headers=headers, json=json_data).json()["content"]
 
         return np.array(response[0]["embedding"])
@@ -166,7 +169,7 @@ class SentenceTransformer(Embedder):
             'content': content
         }
 
-        response = requests.post('http://localhost:3000/create_embeddings',
+        response = requests.post(f'{self.endpoint}/create_embeddings',
                                  headers=headers, json=json_data).json()["content"]
 
         for i, text_element in enumerate(response):
@@ -190,8 +193,8 @@ class Test(Embedder):
 
     """
 
-    def __init__(self):
-        super().__init__("example.com", 3, None)
+    def __init__(self, dimension: int = 3):
+        super().__init__("example.com", dimension, None)
 
     def create_embedding_bulk(self, rows: List[Type[BaseClass]]) -> List[
         Type[BaseClass]]:
@@ -224,3 +227,4 @@ class Test(Embedder):
         :rtype: numpy.array
         """
         return np.array([1, 2, 3])
+        #return np.random.random(self.dimension).astype("float32")

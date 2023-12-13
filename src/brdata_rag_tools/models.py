@@ -1,18 +1,34 @@
+import logging
 import os
 from enum import Enum
-
-import openai
+import tiktoken
+from typing import List
+from openai import OpenAI
 import requests
 
 
 class LLMName(Enum):
     GPT35TURBO = "gpt-3.5-turbo"
     GPT35TURBO0613 = "gpt-3.5-turbo-0613"
+    GPT35TURBO1106 = "gpt-3.5-turbo-1106"
     GPT40314 = "gpt-4-0314"
     GPT40613 = "gpt-4-0613"
     GPT4 = "gpt-4"
     IGEL = "igel"
     BISON001 = "text-bison@001"
+
+    @property
+    def max_input_tokens(self) -> int:
+        if self in [LLMName.GPT35TURBO0613, LLMName.GPT35TURBO]:
+            return 4096
+        elif self in [LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613, LLMName.IGEL, LLMName.BISON001]:
+            # context window size size IGEL: https://github.com/bigscience-workshop/petals/issues/146
+            return 8192
+        elif self  == LLMName.GPT35TURBO1106:
+            return 16385
+        else:
+            logging.warning(f"Unknown context window size for LLM {self}. Opt for default context window size of 2048.")
+            return 2048
 
 
 class Generator:
@@ -40,7 +56,7 @@ class Generator:
 
     :ivar model: The language model to be used for text generation.
     :vartype model: LLMName
-    :ivar token: The API token to access the language model.
+    :ivar auth_token: The API token to access the language model.
     :vartype token: str
     :ivar temperature: The temperature parameter for text generation.
     :vartype temperature: float
@@ -56,35 +72,38 @@ class Generator:
     :vartype number_of_responses: int
 
     """
+
     def __init__(self,
                  model: LLMName,
-                 token: str = None,
+                 auth_token: str = None,
                  temperature: float = None,
                  max_new_tokens: int = None,
                  top_p: float = None,
                  top_k: int = None,
                  length_penalty: float = None,
-                 number_of_responses: int = None
+                 number_of_responses: int = None,
+                 max_token_length: int = None
                  ):
 
         self.model: LLMName = model
-        self.token: str = self.get_token(token)
+        self.auth_token: str = self.get_token(auth_token)
         self.temperature: float = temperature
         self.max_new_tokens: int = max_new_tokens
         self.top_p: float = top_p
         self.top_k: int = top_k
         self.length_penalty: float = length_penalty
         self.number_of_responses = number_of_responses
+        self.max_token_length: int = max_token_length
 
     def get_token(self, token: str) -> str:
         """
-        Returns the given token or retrieves the appropriate token based on the model value.
+        Returns the given auth_token or retrieves the appropriate auth_token based on the model value.
 
-        :param token: The token to be used for authentication.
+        :param token: The auth_token to be used for authentication.
         :type token: str
-        :return: The retrieved token or the given token.
+        :return: The retrieved auth_token or the given auth_token.
         :rtype: str
-        :raises ValueError: If no token is provided for the model value.
+        :raises ValueError: If no auth_token is provided for the model value.
         """
         if token is not None:
             return token
@@ -97,9 +116,55 @@ class Generator:
                 token = os.environ.get("GOOGLE_TOKEN")
 
         if token is None:
-            raise ValueError(f"No token provided for model {self.model.value}.")
+            raise ValueError(f"No auth_token provided for model {self.model.value}.")
         else:
             return token
+
+    def _estimate_tokens_openai(self, text: str) -> int:
+        encoding = tiktoken.encoding_for_model(self.model.value)
+        tokens = encoding.encode(text)
+        return len(tokens)
+
+    def _estimate_tokens_rough(self, text: str) -> int:
+        return int(len(text.split(" ")) * .7)
+
+    def estimate_tokens(self, text: str):
+        if self.model.value.startswith("gpt"):
+            return self._estimate_tokens_openai(text)
+        else:
+            return self._estimate_tokens_rough(text)
+
+
+    def fit_to_context_window(self, prompt: str, context: List[str]) -> List[str]:
+        """
+        Reduces a list of semantic search results to fit the context window of the given LLM.
+
+        Token lengths are estimated and may differ from the real token vector's length.
+
+        Guesses for OpenAI models are more accurate than for other models.
+
+        :param prompt: Your prompt for the LLM
+        :param context: The context retrieved by the semantic search.
+        :return: The reduced context
+        :raises ValueError: If the prompt is too long to fit any context
+        """
+
+        context_window_fit = False
+
+        while not context_window_fit:
+            temp = prompt + " " + " ".join(context)
+
+            if self.estimate_tokens(temp) <= self.model.max_input_tokens:
+                context_window_fit = True
+            else:
+                try:
+                    context.pop(-1)
+                except IndexError:
+                    raise ValueError(f"Prompt is too long to add context from semantic search. Please try to reduce "
+                                     f"the length of your prompt to fit it in the context window size of {self.max_token_length}."
+                                     f"Your current prompt has an estimated length of {self.estimate_tokens(prompt)}.")
+
+        return context
 
     def prompt(self, prompt: str) -> str:
         """
@@ -114,35 +179,40 @@ class Generator:
     # TODO: Check for max context length in tokens (pre encoding or heuristic)
 
 
-class OpenAI(Generator):
+class OpenAi(Generator):
     """
-    Create text from OpenAI.
+    Create text from OpenAi.
 
     :param model: The name of the language model to use.
     :type model: LLMName
-    :param token: The API token for accessing the OpenAI API.
+    :param token: The API auth_token for accessing the OpenAi API.
     :type token: str
     """
-    def __init__(self, model: LLMName, token: str):
+
+    def __init__(self, model: LLMName, auth_token: str):
         super().__init__(
             model=model,
-            token=token,
+            auth_token=auth_token,
             temperature=1.0,
             max_new_tokens=256,
             top_p=0.9,
             number_of_responses=1)
 
+        self.client = OpenAI(api_key=self.auth_token)
+
     def prompt(self, prompt: str) -> str:
-        """Generate with gpt model family."""
-        gen_response = openai.ChatCompletion.create(
-            model=self.model.value,
+        """Generate text with GPT model family."""
+
+        gen_response=self.client.chat.completions.create(
+                model=self.model.value,
             messages=[{"role": "user", "content": prompt}],
             temperature=self.temperature,
             max_tokens=self.max_new_tokens,
             top_p=self.top_p,
             n=self.number_of_responses,
         )
-        return [c["message"]["content"] for c in gen_response["choices"]][0]
+
+        return gen_response.choices[0].message.content
 
 
 class IGEL(Generator):
@@ -157,7 +227,7 @@ class IGEL(Generator):
 
     Attributes:
         model (LLMName): The model used by the IGEL generator.
-        token (str): The token used for authentication.
+        auth_token (str): The token used for authentication.
         temperature (float): The temperature parameter for generation.
         max_new_tokens (int): The maximum number of new tokens to generate.
         top_p (float): The top-p parameter for generation.
@@ -167,10 +237,10 @@ class IGEL(Generator):
         prompt(prompt: str) -> str: Generates text based on the provided prompt.
 
     """
+
     def __init__(self, token=None):
         super().__init__(
             model=LLMName.IGEL,
-            token=os.environ.get("IGEL_TOKEN") if token is None else token,
             temperature=1.0,
             max_new_tokens=256,
             top_p=0.9,
@@ -178,7 +248,7 @@ class IGEL(Generator):
 
     def prompt(self, prompt: str):
         headers = {
-            "Authorization": f"Bearer {self.token}",
+            "Authorization": f"Bearer {self.auth_token}",
             "Content-Type": "application/json",
         }
 
@@ -205,6 +275,7 @@ class GeneratorFactory:
     The `GeneratorFactory` class is responsible for creating instances of different generator classes based on the provided model name.
 
     """
+
     def __init__(self, model_name: LLMName, token: str = None):
         self.model_name = model_name
         self.token = token
@@ -212,7 +283,7 @@ class GeneratorFactory:
     def select_generator(self):
         if self.model_name in [LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613,
                                LLMName.GPT35TURBO, LLMName.GPT35TURBO0613]:
-            return OpenAI(self.model_name, self.token)
+            return OpenAi(self.model_name, self.token)
         elif self.model_name == LLMName.IGEL:
             return IGEL(self.token)
         else:
@@ -225,11 +296,11 @@ class LLM:
 
     Args:
         model_name (LLMName): The name of the language model.
-        token (str, optional): The API token for the language model. Defaults to None.
+        token (str, optional): The API auth_token for the language model. Defaults to None.
 
     Attributes:
         model_name (LLMName): The name of the language model.
-        token (str): The API token for the language model.
+        token (str): The API auth_token for the language model.
         model (Generator): The language model generator.
 
     Methods:
