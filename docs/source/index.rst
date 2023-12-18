@@ -24,7 +24,7 @@ Since the package is hosted on the test instance of pypi, you need to pass the i
 
 .. code-block:: bash
 
-   python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps brdata-rag-tools==0.0.3
+   python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps brdata-rag-tools
 
 We install the package without dependencies since most of the dependencies are not hosted on the test instance of pypi. You may want to install it with the requirements.txt file from the github repository: https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
 
