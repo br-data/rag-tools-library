@@ -38,7 +38,6 @@ class LLMName(Enum):
 
     @property
     def max_input_tokens(self) -> int:
-        """Return context window size for the particular LLM."""
         if self in [LLMName.GPT35TURBO0613, LLMName.GPT35TURBO]:
             return 4096
         elif self in [LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613, LLMName.IGEL, LLMName.BISON001]:
