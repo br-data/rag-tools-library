@@ -5,7 +5,7 @@ from typing import List, Optional, Type
 import numpy as np
 import requests
 
-from datastructures import BaseClass
+from .datastructures import BaseClass
 
 
 class EmbeddingType(Enum):

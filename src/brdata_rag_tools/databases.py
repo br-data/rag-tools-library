@@ -9,8 +9,8 @@ from sqlalchemy import String, text, BLOB
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, Mapped, mapped_column
 
-from datastructures import Base, BaseClass
-from embeddings import EmbeddingType
+from .datastructures import Base, BaseClass
+from .embeddings import EmbeddingType
 
 
 class Database:
