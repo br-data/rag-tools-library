@@ -7,7 +7,6 @@ from models import LLMName
 from models import LLM
 
 if __name__ == "__main__":
-
     # load model
     language_model = LLM(model_name=LLMName.GPT35TURBO)
     embed_type = EmbeddingType.SENTENCE_TRANSFORMERS
@@ -43,7 +42,7 @@ if __name__ == "__main__":
     database.write_rows([podcast1, podcast2, podcast3], create_embeddings = True)
 
     # create the prompt and template
-    user_prompt = "Gib mir spannende Podcasts zum Thema Musik."
+    user_prompt = "Welche spannenden Podcasts zum Thema Musik kannst du mir empfehlen?"
 
     prompt_template = ("Du bist der Podcast-Experte des Bayerischen Rundfunks. "
                        "Eine Userin stellt dir folgende Frage:\n"

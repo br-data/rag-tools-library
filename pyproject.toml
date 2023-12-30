@@ -4,10 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "brdata-rag-tools"
-version = "0.0.3"
+version = "0.0.5"
 authors = [
     { name = "Marco Lehner", email = "marco.lehner@br.de" },
 ]
+
 description = "Improve development of retrieval augmented generation (RAG) applications at the BR AI + Automation Lab."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -80,7 +81,6 @@ dependencies = [
     "sphinxcontrib-qthelp==1.0.6",
     "sphinxcontrib-serializinghtml==1.1.9",
     "SQLAlchemy==2.0.23",
-    "sqlite-vss==0.1.2",
     "tiktoken==0.5.2",
     "tomli==2.0.1",
     "tqdm==4.66.1",
