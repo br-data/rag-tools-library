@@ -39,6 +39,7 @@ jobs:
           path: docs/build  # Specify the folder to upload
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
