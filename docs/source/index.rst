@@ -64,8 +64,28 @@ Now we already can interact with the model via the prompt method:
 
 .. code-block:: python
 
-   joke = llm.model.prompt("Please tell me a joke.")
+   joke = llm.prompt("Please tell me a joke.")
    print(joke)
+
+Chat with the model
+-------------------
+
+Models of the GPT Family also support chat functionality – this means that models are aware of prompts sent earlier to
+the model. You may invoke chat functionality by the chat method.
+
+.. code-block:: python
+   answer = llm.chat("Please return 'test')
+   print(answer)
+   answer = llm.chat("What did I tell you in the last message?")
+   print(answer)
+
+If you want to start a new chat and make the model forget what you've told it in earlier messages, you can start a new
+chat with the `new_chat` method.
+
+.. code-block:: python
+   llm.new_chat()
+   answer = llm.chat("What did I tell you in the last message?")
+   print(answer)
 
 Augmenting your prompt
 ----------------------
