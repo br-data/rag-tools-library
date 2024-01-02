@@ -1,6 +1,11 @@
 name: Deploy documentation to Github Pages
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - develop # Adjust this based on your default branch name
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,8 +20,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
       - name: Install dependencies
         run: |
           pip install sphinx sphinx_rtd_theme myst_parser
@@ -26,13 +35,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: 'docs/build/'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
+        with:
+          branch: documentation
+          folder: docs/build
