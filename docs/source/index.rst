@@ -74,6 +74,7 @@ Models of the GPT Family also support chat functionality – this means that mod
 the model. You may invoke chat functionality by the chat method.
 
 .. code-block:: python
+
    answer = llm.chat("Please return 'test')
    print(answer)
    answer = llm.chat("What did I tell you in the last message?")
@@ -83,6 +84,7 @@ If you want to start a new chat and make the model forget what you've told it in
 chat with the `new_chat` method.
 
 .. code-block:: python
+
    llm.new_chat()
    answer = llm.chat("What did I tell you in the last message?")
    print(answer)
@@ -213,6 +215,7 @@ To select only those podcasts hosted on br24.de, you would write
 Alternatively you may use the sqlalchemy ORM syntax to query the database:
 
 .. code-block:: python
+
    from sqlalchemy import select
 
    with database.session() as session:
@@ -231,6 +234,7 @@ Therefore we query the database with a question, using the `retrieve_similar_con
 To find us some podcasts on music, we simply ask for them:
 
 .. code-block:: python
+
    context = database.retrieve_similar_content("Please show me some podcasts on music.",
                                                table=Podcast,
                                                embedding_type=embedding.SENTENCE_TRANSFORMERS)
@@ -242,6 +246,7 @@ which indicates the distance of the search term's vector and the the content's v
 The smaller `cosine_dist` is, the more similar are query and result.
 
 .. code-block:: python
+
    for row in context:
        print(row["cosine_dist"], row["Podcast"].title)
 
@@ -251,6 +256,7 @@ Augmenting your prompt
 Now we may augment our prompt to the LLM. Therefore we need to write a prompt template:
 
 .. code-block:: python
+
    prompt_template = ("You are the podcast expert at Bayerischer Rundfunk. "
                       "A user asks you the following question:\n"
                       "{}\n"
@@ -264,17 +270,20 @@ In the template we see two placeholders: One for the user question. If we develo
 to us by the user. For now, we just write it ourselves:
 
 .. code-block:: python
+
    user_prompt = "Please recommend me some podcasts on music."
 
 The second placeholder is for the context we retrieved from our database. We just need to restrucutre it as a human
 readable list.
 
 .. code-block:: python
+
     context = [x["Podcast"].title + ": " + x["Podcast"].embedding_source for x in context]
 
 Then we put everything together using a python format string and send it to the LLM:
 
 .. code-block:: python
+
     prompt = prompt_template.format(user_prompt, "\n-".join(context))
     response = language_model.prompt(prompt)
 
@@ -287,6 +296,7 @@ prompt as a string and the context as a list of strings.
 If the context is too long, the function will pop the last elements of your context until it fits the context window.
 
 .. code-block:: python
+
     context = language_model.model.fit_to_context_window(prompt_template + user_prompt, context)
 
 Simply use this function before you pass the context to the LLM.
