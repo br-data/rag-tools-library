@@ -76,12 +76,12 @@ class Embedder:
     :return: None
     """
 
-    def __init__(self, endpoint: str, dimension: int, token: Optional[str] = None, max_prompt_tokens: Optional[int] = None):
+    def __init__(self, endpoint: str, dimension: int, token: Optional[str] = None,
+                 max_prompt_tokens: Optional[int] = None):
         self.endpoint = endpoint
         self.dimension = dimension
         self.token = token
         self.max_prompt_tokens = max_prompt_tokens
-
 
     def create_embedding_bulk(self, rows: List[Type[BaseClass]]) -> List[
         Type[BaseClass]]:
@@ -89,7 +89,6 @@ class Embedder:
 
     def create_embedding(self, text: str) -> np.array:
         raise NotImplementedError()
-
 
 
 class SentenceTransformer(Embedder):
@@ -110,8 +109,8 @@ class SentenceTransformer(Embedder):
     """
 
     def __init__(self):
-        super().__init__(endpoint= "https://gbert-cosine-embeddings.brdata-dev.de", dimension=1024,
-                         token = os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
+        super().__init__(endpoint="https://gbert-cosine-embeddings.brdata-dev.de", dimension=1024,
+                         token=os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
 
     def create_embedding(self, text: str) -> np.array:
         """
@@ -151,6 +150,9 @@ class SentenceTransformer(Embedder):
         if len(rows) > 250:
             raise NotImplementedError(
                 "Sorry, only 250 rows may be processed at one time.")
+
+        if self.token is None:
+            raise ValueError("No Access token specified. Please set `SENTENCE_TRANSFORMER_TOKEN` env var.")
 
         headers = {
             'accept': 'application/json',
@@ -227,4 +229,4 @@ class Test(Embedder):
         :rtype: numpy.array
         """
         return np.array([1, 2, 3])
-        #return np.random.random(self.dimension).astype("float32")
+        # return np.random.random(self.dimension).astype("float32")
