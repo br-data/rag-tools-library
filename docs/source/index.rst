@@ -1,4 +1,4 @@
-.. brdata-rag-tools documentation master file, created by
+.. brdata-rag-tools documentation main file, created by
    sphinx-quickstart on Thu Dec  7 18:15:58 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -130,7 +130,146 @@ The returned abstract table is an SQLAlchemy table object. You may add your own 
        title: Mapped[str] = mapped_column(String)
        url: Mapped[str] = mapped_column(String)
 
-Above we name the table as "podcast" in
+Give the table any name you like using the __tablename__ attribute. This is the only necessary field. Other columns, like title and url in the example above, are introduced using the SQLAlchemy logic.
+
+For more information on this topic, please refer to the `SQLAlchemy Tutorial <https://docs.sqlalchemy.org/en/20/tutorial/metadata.html#declaring-mapped-classes>`_. A list of types to use in your mapped_column attributes is available `here <https://docs.sqlalchemy.org/en/20/core/type_basics.html#generic-camelcase-types>`_.
+
+Now that we have made our Podcast Table class, we can actually fill it with content:
+
+.. code-block:: python
+
+   podcast1 = Podcast(title="TRUE CRIME - Under Suspicion",
+                      id="1",
+                      url="example.com",
+                      embedding_source="Who is rightfully, who is wrongly suspected here? What if people are wrongly convicted, and no one believes them? Or vice versa: If the true perpetrator goes unpunished? Under Suspicion - In the 7th season of the successful BAYERN 3 True Crime Podcast, defense attorney Dr. Alexander Stevens and BAYERN 3 host Jacqueline Belle discuss new exciting criminal cases. This time, it's about people who have come under suspicion. Who is guilty? Who is lying, who is telling the truth? And in the end, are the right ones always convicted?")
+
+   podcast2 = Podcast(title="SCHOENHOLTZ - The Orchestra Podcast",
+                      id="2",
+                      url="br24.de",
+                      embedding_source="How does an orchestra work? How do you get in? And why do orchestra musicians always wear black? Who could answer these questions better than an orchestra musician herself! Anne Schoenholtz is a violinist in the Bavarian Radio Symphony Orchestra, BRSO - an orchestra that has just been voted the third best in the world. As the host of the orchestra podcast, Anne takes us behind the scenes of the BRSO and elicits intimate confessions and funny stories from her colleagues about orchestra life. In the third season, we find out how concert programs are created, what ails musicians typically, and why there are so many jokes about violas. Sir Simon Rattle, the new chief conductor of the BRSO, answers community questions at the end of each episode.")
+
+   podcast3 = Podcast(title="Crime Scene History – True Crime meets History",
+                      id="3",
+                      url="bla.com",
+                      embedding_source="In Crime Scene History, Niklas Fischer and Hannes Liebrandt, two historians from Ludwig Maximilian University in Munich, leave the lecture hall and travel back to exciting crimes from the past: a mysterious water corpse in the Berlin Landwehr Canal, young Stalin as the leader of a bloody robbery, or the hunt for a war criminal halfway around the world. True crime from history discussed in an entertaining way. The focus is on the question of what this actually has to do with us today. Crime Scene History is a podcast from Bayern 2 in collaboration with the Georg von Vollmar Academy.")
+
+
+Since we ware using SQLAlchemy's Table classes, those tables are the exact representation of what will be stored in our database and we will interact only through those Table classes with the content from the vector store.
+
+Right now, we only have content in our tables and no embedding so far. The embedding is automatically computed when you send your table to the database:
+
+.. code-block:: python
+
+   database.write_rows([podcast1, podcast2, podcast3])
+
+Remember the following line:
+
+.. code-block:: python
+
+   embedding_table = database.create_abstract_embedding_table(embed_type=embedding)
+
+Here we've specified the embedding type for the Table. The embeddings are now created from the type we've specified in this line and sent to the vector store. Now we can query the database for content. Via the `database.session()` attribute we may also interact with it as a normal database via SQLAlchemy.
+
+.. code-block:: python
+
+   with database.session() as session:
+       response = session.execute(text("SELECT * from podcast;")).all()
+
+   for row in response:
+       print(row.title)
+
+This statement now prints out all of the three podcasts in the database. Just alike you can write your custom SQL queries to filter your results.
+
+To select only those podcasts hosted on br24.de, you would write
+
+.. code-block:: python
+
+   with database.session() as session:
+       response = session.execute(text("SELECT * from podcasts where url = 'br24.de';")).all()
+
+   for row in response:
+       print(row.title)
+
+Alternatively you may use the sqlalchemy ORM syntax to query the database:
+
+.. code-block:: python
+   from sqlalchemy import select
+
+   with database.session() as session:
+       response = session.execute(select(Podcast).where(Podcast.url == 'br24.de')).all()
+
+   for row in response:
+       print(row.title)
+
+Finding similar results
+-----------------------
+
+But conventional queries are not the strength of vector databases. We want to find content similar to a user query to
+augment our prompts to the LLM with.
+
+Therefore we query the database with a question, using the `retrieve_similar_content` method.
+To find us some podcasts on music, we simply ask for them:
+
+.. code-block:: python
+   context = database.retrieve_similar_content("Please show me some podcasts on music.",
+                                               table=Podcast,
+                                               embedding_type=embedding.SENTENCE_TRANSFORMERS)
+
+
+The returned context object is a list of dictionaries, with the table name as key for the context and the key `cosine_dist`
+which indicates the distance of the search term's vector and the the content's vector.
+
+The smaller `cosine_dist` is, the more similar are query and result.
+
+.. code-block:: python
+   for row in context:
+       print(row["cosine_dist"], row["Podcast"].title)
+
+Augmenting your prompt
+----------------------
+
+Now we may augment our prompt to the LLM. Therefore we need to write a prompt template:
+
+.. code-block:: python
+   prompt_template = ("You are the podcast expert at Bayerischer Rundfunk. "
+                      "A user asks you the following question:\n"
+                      "{}\n"
+                      "Here are some podcasts that you can recommend:\n"
+                      "-{}\n"
+                      "Limit yourself to the selection of podcasts and do not invent new ones. Recommend only one podcast from the list and briefly justify your decision. "
+                      "Write in the second person, addressing the user directly.")
+
+
+In the template we see two placeholders: One for the user question. If we develop an app, this would be the prompt given
+to us by the user. For now, we just write it ourselves:
+
+.. code-block:: python
+   user_prompt = "Please recommend me some podcasts on music."
+
+The second placeholder is for the context we retrieved from our database. We just need to restrucutre it as a human
+readable list.
+
+.. code-block:: python
+    context = [x["Podcast"].title + ": " + x["Podcast"].embedding_source for x in context]
+
+Then we put everything together using a python format string and send it to the LLM:
+
+.. code-block:: python
+    prompt = prompt_template.format(user_prompt, "\n-".join(context))
+    response = language_model.prompt(prompt)
+
+    print(response)
+
+LLM usually only have a limited amount of tokens you may pass to them. If you run your RAG applicatoin on the server,
+there is a little helper function to make sure you don't exceed the token limit. You pass it your template and the user
+prompt as a string and the context as a list of strings.
+
+If the context is too long, the function will pop the last elements of your context until it fits the context window.
+
+.. code-block:: python
+    context = language_model.model.fit_to_context_window(prompt_template + user_prompt, context)
+
+Simply use this function before you pass the context to the LLM.
 
 Indices and tables
 ==================
