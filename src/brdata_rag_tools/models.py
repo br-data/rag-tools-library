@@ -2,7 +2,7 @@ import logging
 import os
 from enum import Enum
 import tiktoken
-from typing import List
+from typing import List, Dict
 from openai import OpenAI
 import requests
 
@@ -18,13 +18,25 @@ class LLMName(Enum):
     BISON001 = "text-bison@001"
 
     @property
+    def family(self) -> str:
+        if self in [LLMName.GPT35TURBO0613, LLMName.GPT35TURBO, LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613, LLMName.GPT35TURBO1106]:
+            return "GPT"
+        elif self in [LLMName.IGEL]:
+            return "IGEL"
+        elif self in [LLMName.BISON001]:
+            return "BARD"
+        else:
+            logging.warning(f"Unknown model family for LLM {self}. Opt for default context window size of 2048.")
+            return ""
+
+    @property
     def max_input_tokens(self) -> int:
         if self in [LLMName.GPT35TURBO0613, LLMName.GPT35TURBO]:
             return 4096
         elif self in [LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613, LLMName.IGEL, LLMName.BISON001]:
             # context window size size IGEL: https://github.com/bigscience-workshop/petals/issues/146
             return 8192
-        elif self  == LLMName.GPT35TURBO1106:
+        elif self == LLMName.GPT35TURBO1106:
             return 16385
         else:
             logging.warning(f"Unknown context window size for LLM {self}. Opt for default context window size of 2048.")
@@ -94,6 +106,7 @@ class Generator:
         self.length_penalty: float = length_penalty
         self.number_of_responses = number_of_responses
         self.max_token_length: int = max_token_length
+        self.history = ChatHistory(self.model)
 
     def get_token(self, token: str) -> str:
         """
@@ -133,7 +146,6 @@ class Generator:
             return self._estimate_tokens_openai(text)
         else:
             return self._estimate_tokens_rough(text)
-
 
     def fit_to_context_window(self, prompt: str, context: List[str]) -> List[str]:
         """
@@ -176,7 +188,9 @@ class Generator:
         :rtype: str
         """
         raise NotImplementedError("Please implement the prompt method.")
-    # TODO: Check for max context length in tokens (pre encoding or heuristic)
+
+    def chat(self, prompt: str) -> str:
+        raise NotImplementedError("Please implement the chat method.")
 
 
 class OpenAi(Generator):
@@ -203,8 +217,8 @@ class OpenAi(Generator):
     def prompt(self, prompt: str) -> str:
         """Generate text with GPT model family."""
 
-        gen_response=self.client.chat.completions.create(
-                model=self.model.value,
+        gen_response = self.client.chat.completions.create(
+            model=self.model.value,
             messages=[{"role": "user", "content": prompt}],
             temperature=self.temperature,
             max_tokens=self.max_new_tokens,
@@ -213,6 +227,23 @@ class OpenAi(Generator):
         )
 
         return gen_response.choices[0].message.content
+
+    def chat(self, prompt: str) -> str:
+        self.history.add(Role.USER, prompt)
+
+        gen_response = self.client.chat.completions.create(
+            model=self.model.value,
+            messages=self.history.get_content(),
+            temperature=self.temperature,
+            max_tokens=self.max_new_tokens,
+            top_p=self.top_p,
+            n=self.number_of_responses,
+        )
+        
+        content = gen_response.choices[0].message.content
+        self.history.add(Role.SYSTEM, content)
+        return content
+
 
 
 class IGEL(Generator):
@@ -267,6 +298,10 @@ class IGEL(Generator):
 
         response.raise_for_status()
         return response.json()["response"]
+
+    def chat(self, prompt: str) -> str:
+        raise NotImplementedError("The IGEL Language Model does not support chat messages. Please use a model from the "
+                                  "GPT or BARD Family instead.")
 
 
 class GeneratorFactory:
@@ -323,3 +358,37 @@ class LLM:
         :rtype: str
         """
         return self.model.prompt(prompt)
+    
+    def chat(self, prompt: str) -> str:
+        return self.model.chat(prompt)
+
+    def new_chat(self):
+        self.model.history.reset()
+    
+
+
+class Role(Enum):
+    USER = "user"
+    SYSTEM = "system"
+
+
+class ChatHistory:
+    def __init__(self, model_name: LLMName):
+        self._history: List[Dict] = []
+        self.model_name = model_name
+
+    def add(self, role: Role, message: str):
+        self._history.append({"role": role.value, "content": message})
+    
+    def reset(self):
+        self._history = []
+
+    def get_content(self):
+        if self.model_name.family == "GPT":
+            return self._history
+        elif self.model_name.family == "IGEL":
+            raise NotImplementedError("IGEL is not implemented yet")
+        elif self.model_name.family == "BARD":
+            raise NotImplementedError("BARD is not implemented yet")
+        elif self.model_name.family == "":
+            raise ValueError("Unknown Model.")

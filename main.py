@@ -1,17 +1,31 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from databases import PGVector, FAISS
-from embeddings import EmbeddingType
-from models import LLMName
-from models import LLM
+from src.brdata_rag_tools import models
+from src.brdata_rag_tools import databases
+from src.brdata_rag_tools import embeddings
 
 if __name__ == "__main__":
     # load model
-    language_model = LLM(model_name=LLMName.GPT35TURBO)
-    embed_type = EmbeddingType.SENTENCE_TRANSFORMERS
+    language_model = models.LLM(model_name=models.LLMName.GPT35TURBO)
+
+    response = language_model.prompt("Please return 'test'.")
+    print(response)
+
+    response = language_model.chat("Please return 'test'.")
+    print(response)
+    response = language_model.chat("What did I tell you in the last message?")
+    print(response)
+
+    language_model.new_chat()
+
+    response = language_model.chat("What did I tell you in the last message?")
+    print(response)
+
+
+    embed_type = embeddings.EmbeddingType.SENTENCE_TRANSFORMERS
     # set up database
-    database = FAISS()
+    database = databases.FAISS()
     database.drop_table("podcast")
     EmbeddingTable = database.create_abstract_embedding_table(embed_type=embed_type)
 
