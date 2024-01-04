@@ -152,7 +152,7 @@ class SentenceTransformer(Embedder):
                 "Sorry, only 250 rows may be processed at one time.")
 
         if self.token is None:
-            raise ValueError("No Access token specified. Please set `SENTENCE_TRANSFORMER_TOKEN` env var.")
+            raise ValueError("No Access token specified. Please set `SENTENCE_TRANSFORMER_TOKEN` environment variable.")
 
         headers = {
             'accept': 'application/json',
@@ -162,6 +162,12 @@ class SentenceTransformer(Embedder):
 
         content = []
         for row in rows:
+
+            if row.id is None or row.embedding_source is None:
+                raise ValueError("ID or embedding source is missing. Please provide an ID or embedding source in your table"
+                                 "definition as described here with the declaration of podcast1: "
+                                 "https://br-data.github.io/rag-tools-library/#augmenting-your-prompt.")
+
             content.append({
                 'id': row.id,
                 'text': row.embedding_source,
@@ -172,7 +178,12 @@ class SentenceTransformer(Embedder):
         }
 
         response = requests.post(f'{self.endpoint}/create_embeddings',
-                                 headers=headers, json=json_data).json()["content"]
+                                 headers=headers, json=json_data).json()
+        try:
+            response = response["content"]
+        except KeyError:
+            raise ValueError("The Embedding service did not return any results. Please make sure your token is correct"
+                             " and embedding_source is of a meaningful format.")
 
         for i, text_element in enumerate(response):
             if rows[i].id == text_element["id"]:
