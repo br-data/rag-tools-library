@@ -35,15 +35,15 @@ We install the package without dependencies since most of the dependencies are n
 Basic Usage
 -----------
 
-First we choose which LLM we want to use by initiating the LLM class with a value from the LLMName enum.
+First we choose which LLM we want to use by initiating the LLM class with a value from the LLMConfig enum.
 
 All LLMs from brdata-rag-tools are connected via an API. The library serves as a wrapper to make the models more easily accessible.
 
 .. code-block:: python
 
-   from brdata_rag_tools.models import LLM, LLMName
+   from brdata_rag_tools.models import LLM, LLMConfig
 
-   llm = LLM(model_name=LLMName.GPT35TURBO)
+   llm = LLM(model_name=LLMConfig.GPT35TURBO)
 
 In this example we chose the GPT 3.5 Turbo model, but different flavours of GPT 3 and 4 are available, as well as the fine tuned on german text model IGEL and Google's Bison models.
 
@@ -52,6 +52,7 @@ All GPT models may be used by anyone with an API token, the IGEL and Bison Model
 Next we set the environment with OpenAI's access token:
 
 .. code-block:: python
+
    os.environ["OPENAI_TOKEN"] = "YOUR TOKEN HERE"
 
 For IGEL set the env var "IGEL_TOKEN" or "GOOGLE_TOKEN" for the Bison model respectively.
@@ -156,6 +157,12 @@ Give the table any name you like using the __tablename__ attribute. This is the 
 
 For more information on this topic, please refer to the `SQLAlchemy Tutorial <https://docs.sqlalchemy.org/en/20/tutorial/metadata.html#declaring-mapped-classes>`_. A list of types to use in your mapped_column attributes is available `here <https://docs.sqlalchemy.org/en/20/core/type_basics.html#generic-camelcase-types>`_.
 
+Next, create the tables in the database:
+
+.. code-block:: python
+
+   database.create_tables()
+
 Now that we have made our Podcast Table class, we can actually fill it with content:
 
 .. code-block:: python
@@ -250,8 +257,8 @@ The smaller `cosine_dist` is, the more similar are query and result.
    for row in context:
        print(row["cosine_dist"], row["Podcast"].title)
 
-Augmenting your prompt
-----------------------
+Adding context to your prompt
+-----------------------------
 
 Now we may augment our prompt to the LLM. Therefore we need to write a prompt template:
 
