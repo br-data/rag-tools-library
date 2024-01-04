@@ -15,7 +15,8 @@ Welcome to brdata-rag-tools's documentation!
 Tutorial
 ========
 
-Hello to the brdata-rag-tools tutorial. In this brief introduction I will show you how to use the library with a brief example.
+Hello to the brdata-rag-tools tutorial. In this brief introduction I will show you how to use the library with a brief
+example.
 
 Installation
 ------------
@@ -26,7 +27,9 @@ Since the package is hosted on the test instance of pypi, you need to pass the i
 
    python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps brdata-rag-tools
 
-We install the package without dependencies since most of the dependencies are not hosted on the test instance of pypi. You may want to install it with the requirements.txt file from the github repository: https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
+We install the package without dependencies since most of the dependencies are not hosted on the test instance of pypi.
+You may want to install it with the requirements.txt file from the github repository:
+https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
 
 .. code-block:: bash
 
@@ -37,7 +40,8 @@ Basic Usage
 
 First we choose which LLM we want to use by initiating the LLM class with a value from the LLMConfig enum.
 
-All LLMs from brdata-rag-tools are connected via an API. The library serves as a wrapper to make the models more easily accessible.
+All LLMs from brdata-rag-tools are connected via an API. The library serves as a wrapper to make the models more easily
+accessible.
 
 .. code-block:: python
 
@@ -45,9 +49,11 @@ All LLMs from brdata-rag-tools are connected via an API. The library serves as a
 
    llm = LLM(model_name=LLMConfig.GPT35TURBO)
 
-In this example we chose the GPT 3.5 Turbo model, but different flavours of GPT 3 and 4 are available, as well as the fine tuned on german text model IGEL and Google's Bison models.
+In this example we chose the GPT 3.5 Turbo model, but different flavours of GPT 3 and 4 are available, as well as the
+fine tuned on german text model IGEL and Google's Bison models.
 
-All GPT models may be used by anyone with an API token, the IGEL and Bison Model is only accessible from BR Data's infrastructure.
+All GPT models may be used by anyone with an API token, the IGEL and Bison Model is only accessible from BR Data's
+infrastructure.
 
 Next we set the environment with OpenAI's access token:
 
@@ -90,16 +96,46 @@ chat with the `new_chat` method.
    answer = llm.chat("What did I tell you in the last message?")
    print(answer)
 
-Augmenting your prompt
-----------------------
+Databases
+----------
 
-We do not only want to talk to our LLM, we want to augment it's prompt. This means we want to query a database for relevant content.
+We do not only want to talk to our LLM, we want to augment it's prompt. This means we want to query a database for
+relevant content.
 
-This is done using so called semantic, or vector, search. For semantic search the searchable content is transformed into a numerical representation, a vector embedding.
+This is done using so called semantic, or vector, search. For semantic search the searchable content is transformed
+into a numerical representation, a vector embedding.
 
-To retrieve relevant content, the user's prompt is also transformed into a vector. The prompt-vector is then compared to all vectors in the database and the most similar vectors are retrieved.
+To retrieve relevant content, the user's prompt is also transformed into a vector. The prompt-vector is then compared
+to all vectors in the database and the most similar vectors are retrieved.
 
-This vector based search needs specialized database types. Brdata-rag-tools currently supports only PGVector databases. The easiest way to run it, if you're not on the BR data infrastructure is to run it via docker:
+You can choose of two different database types:
+
+1. PgVector a database based on Postgres with an extension for vector search. It is a good choice to use if you plan to
+build production services. You need to deploy the database yourself.
+2. SQLite with FAISS is a good choice if you want to try out something. While FAISS is a very capable library the usage
+in this library is not optimized for production.
+
+FAISS and SQLite
+~~~~~~~~~~~~~~~~
+
+To create your database simply import and invoke it. Without any parameters it will be a memory-only database.
+E.g. if you stop your program, the data will be lost.
+
+.. code-block:: python
+    from brdata_rag_tools.databases import FAISS
+    database = FAISS()
+
+To write your database to disk, use the database parameter and pass it the path.
+
+.. code-block:: python
+
+    database = FAISS(database="FAISS.db")
+
+
+PGVector
+~~~~~~~~
+
+The easiest way to run it, if you're not on the BR data infrastructure is to run it via docker:
 
 .. code-block:: bash
 
@@ -107,7 +143,8 @@ This vector based search needs specialized database types. Brdata-rag-tools curr
 
 Follow the instructions to set a password or trust all hosts.
 
-If you're on the BR data infrastructure, simply add pgvector as database type to your project's config.yaml file and forward port 5432 to localhost.
+If you're on the BR data infrastructure, simply add pgvector as database type to your project's config.yaml file and
+forward port 5432 to localhost.
 
 Once you have your instance of pgvector running instance the PGVector class and supply it with the database's password.
 
@@ -116,9 +153,13 @@ Once you have your instance of pgvector running instance the PGVector class and 
    from brdata_rag_tools.databases import PGVector
    database = PGVector(password="PASSWORD")
 
+Populate your database
+----------------------
+
 To search for relevant content, you first need to ingest it in the database.
 
-Therefore you need a table in the database to ingest your data. You get a bare minimum of such a table with the following method:
+Therefore you need a table in the database to ingest your data. You get a bare minimum of such a table with the
+following method:
 
 .. code-block:: python
 
@@ -130,11 +171,17 @@ This method returns an abstract Database Table. Those table always contain the f
 - embedding (Vector)
 - embedding_source (string)
 
-The embedding column will be generated by the Database from the content in embedding_source. The id needs to be unique for each row.
+The Embedding Type
+~~~~~~~~~~~~~~~~~~
 
-To actually use it, you need to inherit from the abstract table. In the following example, we will use our little search for podcast recommendations.
+The embedding column will be generated by the Database from the content in embedding_source. The id needs to be unique
+for each row.
 
-The table needs to know which kind of embedding you want to use. The most universal embedding type is Sentence Transformers, which is fine tuned for cosine similarity comparison of German texts.
+To actually use it, you need to inherit from the abstract table. In the following example, we will use our little search
+for podcast recommendations.
+
+The table needs to know which kind of embedding you want to use. The most universal embedding type is Sentence
+Transformers, which is fine tuned for cosine similarity comparison of German texts.
 
 .. code-block:: python
 
@@ -144,7 +191,11 @@ The table needs to know which kind of embedding you want to use. The most univer
 
    embeding_table = database.create_abstract_embedding_table(embed_type=embedding)
 
-The returned abstract table is an SQLAlchemy table object. You may add your own Columns to it to store data additional to the three beforementioned items.
+The database table
+~~~~~~~~~~~~~~~~~~
+
+The returned abstract table is an SQLAlchemy table object. You may add your own Columns to it to store data additional
+to the three beforementioned items.
 
 .. code-block:: python
 
@@ -153,7 +204,8 @@ The returned abstract table is an SQLAlchemy table object. You may add your own 
        title: Mapped[str] = mapped_column(String)
        url: Mapped[str] = mapped_column(String)
 
-Give the table any name you like using the __tablename__ attribute. This is the only necessary field. Other columns, like title and url in the example above, are introduced using the SQLAlchemy logic.
+Give the table any name you like using the __tablename__ attribute. This is the only necessary field. Other columns,
+like title and url in the example above, are introduced using the SQLAlchemy logic.
 
 For more information on this topic, please refer to the `SQLAlchemy Tutorial <https://docs.sqlalchemy.org/en/20/tutorial/metadata.html#declaring-mapped-classes>`_. A list of types to use in your mapped_column attributes is available `here <https://docs.sqlalchemy.org/en/20/core/type_basics.html#generic-camelcase-types>`_.
 
@@ -183,13 +235,18 @@ Now that we have made our Podcast Table class, we can actually fill it with cont
                       embedding_source="In Crime Scene History, Niklas Fischer and Hannes Liebrandt, two historians from Ludwig Maximilian University in Munich, leave the lecture hall and travel back to exciting crimes from the past: a mysterious water corpse in the Berlin Landwehr Canal, young Stalin as the leader of a bloody robbery, or the hunt for a war criminal halfway around the world. True crime from history discussed in an entertaining way. The focus is on the question of what this actually has to do with us today. Crime Scene History is a podcast from Bayern 2 in collaboration with the Georg von Vollmar Academy.")
 
 
-Since we ware using SQLAlchemy's Table classes, those tables are the exact representation of what will be stored in our database and we will interact only through those Table classes with the content from the vector store.
+Since we ware using SQLAlchemy's Table classes, those tables are the exact representation of what will be stored in our
+database and we will interact only through those Table classes with the content from the vector store.
 
-Right now, we only have content in our tables and no embedding so far. The embedding is automatically computed when you send your table to the database:
+Right now, we only have content in our tables and no embedding so far. The embedding is automatically computed when you
+send your table to the database:
 
 .. code-block:: python
 
    database.write_rows([podcast1, podcast2, podcast3])
+
+Querying the database
+---------------------
 
 Remember the following line:
 
@@ -197,7 +254,9 @@ Remember the following line:
 
    embedding_table = database.create_abstract_embedding_table(embed_type=embedding)
 
-Here we've specified the embedding type for the Table. The embeddings are now created from the type we've specified in this line and sent to the vector store. Now we can query the database for content. Via the `database.session()` attribute we may also interact with it as a normal database via SQLAlchemy.
+Here we've specified the embedding type for the Table. The embeddings are now created from the type we've specified in
+this line and sent to the vector store. Now we can query the database for content. Via the `database.session()`
+attribute we may also interact with it as a normal database via SQLAlchemy.
 
 .. code-block:: python
 
@@ -207,7 +266,8 @@ Here we've specified the embedding type for the Table. The embeddings are now cr
    for row in response:
        print(row.title)
 
-This statement now prints out all of the three podcasts in the database. Just alike you can write your custom SQL queries to filter your results.
+This statement now prints out all of the three podcasts in the database. Just alike you can write your custom SQL
+queries to filter your results.
 
 To select only those podcasts hosted on br24.de, you would write
 
@@ -232,7 +292,7 @@ Alternatively you may use the sqlalchemy ORM syntax to query the database:
        print(row.title)
 
 Finding similar results
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 But conventional queries are not the strength of vector databases. We want to find content similar to a user query to
 augment our prompts to the LLM with.
@@ -247,7 +307,8 @@ To find us some podcasts on music, we simply ask for them:
                                                embedding_type=embedding.SENTENCE_TRANSFORMERS)
 
 
-The returned context object is a list of dictionaries, with the table name as key for the context and the key `cosine_dist`
+The returned context object is a list of dictionaries, with the table name as key for the context and the key
+`cosine_dist`
 which indicates the distance of the search term's vector and the the content's vector.
 
 The smaller `cosine_dist` is, the more similar are query and result.
