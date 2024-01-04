@@ -12,9 +12,10 @@ You find a brief tutorial and the documentation under [br-data.github.io/rag-too
 - [ ] Add Google Bison to available LLMs
 - [x] Add an offline database alternative
   - [x] FAISS and SQLite
-- [ ] Allow users to register their own LLMs and Embedding models
+- [x] Allow users to register their own LLMs 
+- [ ] Allow users to register their own Embedding models
 - [ ] Support Semantic Scholar endpoint to generate embeddings for scientific papers.
-- [ ] Support chat functionality; e.g. let the user give feedback on the result to the LLM.
+- [x] Support chat functionality; e.g. let the user give feedback on the result to the LLM.
 
 # Deployment
 
