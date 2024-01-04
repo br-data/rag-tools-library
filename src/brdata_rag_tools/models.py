@@ -1,13 +1,59 @@
-import logging
 import os
-from enum import Enum
+from aenum import Enum, extend_enum
 import tiktoken
 from typing import List, Dict
-from openai import OpenAI
+from openai import OpenAI as oai
 import requests
+import logging
 
 
-class LLMName(Enum):
+def register(model, name=None, max_input_tokens=None, family=None):
+    extend_enum(LLMConfig, name.upper(), name)
+    user_models[name] = model
+
+    llmdata[name] = {
+        "family": family,
+        "max_input_tokens": max_input_tokens,
+    }
+
+    logging.info("Successfully registered model '{}'.".format(name))
+
+
+user_models = {}
+
+llmdata = {
+    "gpt-3.5-turbo": {
+        "family": "GPT",
+        "max_input_tokens": 4096,
+    },
+    "gpt-3.5-turbo-0613": {
+        "family": "GPT",
+        "max_input_tokens": 4096,
+    },
+    "gpt-3.5-turbo-1106": {
+        "family": "GPT",
+        "max_input_tokens": 16385,
+    },
+    "gpt-4-0314": {
+        "family": "GPT",
+        "max_input_tokens": 8192,
+    },
+    "gpt-4-0613": {
+        "family": "GPT",
+        "max_input_tokens": 8192,
+    },
+    "gpt-4": {
+        "family": "GPT",
+        "max_input_tokens": 8192,
+    },
+    "igel": {
+        "family": "IGEL",
+        "max_input_tokens": 2048,
+    },
+}
+
+
+class LLMConfig(Enum):
     GPT35TURBO = "gpt-3.5-turbo"
     GPT35TURBO0613 = "gpt-3.5-turbo-0613"
     GPT35TURBO1106 = "gpt-3.5-turbo-1106"
@@ -15,32 +61,14 @@ class LLMName(Enum):
     GPT40613 = "gpt-4-0613"
     GPT4 = "gpt-4"
     IGEL = "igel"
-    BISON001 = "text-bison@001"
 
     @property
     def family(self) -> str:
-        if self in [LLMName.GPT35TURBO0613, LLMName.GPT35TURBO, LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613, LLMName.GPT35TURBO1106]:
-            return "GPT"
-        elif self in [LLMName.IGEL]:
-            return "IGEL"
-        elif self in [LLMName.BISON001]:
-            return "BARD"
-        else:
-            logging.warning(f"Unknown model family for LLM {self}. Opt for default context window size of 2048.")
-            return ""
+        return llmdata[self.value]["family"]
 
     @property
     def max_input_tokens(self) -> int:
-        if self in [LLMName.GPT35TURBO0613, LLMName.GPT35TURBO]:
-            return 4096
-        elif self in [LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613, LLMName.IGEL, LLMName.BISON001]:
-            # context window size size IGEL: https://github.com/bigscience-workshop/petals/issues/146
-            return 8192
-        elif self == LLMName.GPT35TURBO1106:
-            return 16385
-        else:
-            logging.warning(f"Unknown context window size for LLM {self}. Opt for default context window size of 2048.")
-            return 2048
+        return llmdata[self.value]["max_input_tokens"]
 
 
 class Generator:
@@ -50,7 +78,7 @@ class Generator:
     This class represents a generator for text generation using language models.
 
     :param model: The language model to be used for text generation.
-    :type model: LLMName
+    :type model: LLMConfig
     :param token: The API token to access the language model. If not provided, the token will be fetched based on the model value.
     :type token: str, optional
     :param temperature: The temperature parameter for text generation. A higher value (e.g., 1.0) makes the output more random, while a lower value (e.g., 0.2) makes it more focused and deterministic. If not provided, the default model's temperature will be used.
@@ -86,7 +114,7 @@ class Generator:
     """
 
     def __init__(self,
-                 model: LLMName,
+                 model=None,
                  auth_token: str = None,
                  temperature: float = None,
                  max_new_tokens: int = None,
@@ -94,10 +122,9 @@ class Generator:
                  top_k: int = None,
                  length_penalty: float = None,
                  number_of_responses: int = None,
-                 max_token_length: int = None
+                 max_token_length: int = None,
                  ):
 
-        self.model: LLMName = model
         self.auth_token: str = self.get_token(auth_token)
         self.temperature: float = temperature
         self.max_new_tokens: int = max_new_tokens
@@ -106,6 +133,7 @@ class Generator:
         self.length_penalty: float = length_penalty
         self.number_of_responses = number_of_responses
         self.max_token_length: int = max_token_length
+        self.model: LLMConfig = model
         self.history = ChatHistory(self.model)
 
     def get_token(self, token: str) -> str:
@@ -198,12 +226,12 @@ class OpenAi(Generator):
     Create text from OpenAi.
 
     :param model: The name of the language model to use.
-    :type model: LLMName
+    :type model: LLMConfig
     :param token: The API auth_token for accessing the OpenAi API.
     :type token: str
     """
 
-    def __init__(self, model: LLMName, auth_token: str):
+    def __init__(self, model: LLMConfig, auth_token: str):
         super().__init__(
             model=model,
             auth_token=auth_token,
@@ -212,7 +240,7 @@ class OpenAi(Generator):
             top_p=0.9,
             number_of_responses=1)
 
-        self.client = OpenAI(api_key=self.auth_token)
+        self.client = oai(api_key=self.auth_token)
 
     def prompt(self, prompt: str) -> str:
         """Generate text with GPT model family."""
@@ -239,11 +267,10 @@ class OpenAi(Generator):
             top_p=self.top_p,
             n=self.number_of_responses,
         )
-        
+
         content = gen_response.choices[0].message.content
         self.history.add(Role.SYSTEM, content)
         return content
-
 
 
 class IGEL(Generator):
@@ -257,7 +284,7 @@ class IGEL(Generator):
         token (str, optional): A token for authentication. Defaults to None.
 
     Attributes:
-        model (LLMName): The model used by the IGEL generator.
+        model (LLMConfig): The model used by the IGEL generator.
         auth_token (str): The token used for authentication.
         temperature (float): The temperature parameter for generation.
         max_new_tokens (int): The maximum number of new tokens to generate.
@@ -269,13 +296,14 @@ class IGEL(Generator):
 
     """
 
-    def __init__(self, token=None):
+    def __init__(self, model, auth_token=None):
         super().__init__(
-            model=LLMName.IGEL,
+            model=model,
             temperature=1.0,
             max_new_tokens=256,
             top_p=0.9,
-            length_penalty=1.0)
+            length_penalty=1.0,
+            auth_token=auth_token)
 
     def prompt(self, prompt: str):
         headers = {
@@ -304,37 +332,16 @@ class IGEL(Generator):
                                   "GPT or BARD Family instead.")
 
 
-class GeneratorFactory:
-    """
-
-    The `GeneratorFactory` class is responsible for creating instances of different generator classes based on the provided model name.
-
-    """
-
-    def __init__(self, model_name: LLMName, token: str = None):
-        self.model_name = model_name
-        self.token = token
-
-    def select_generator(self):
-        if self.model_name in [LLMName.GPT4, LLMName.GPT40314, LLMName.GPT40613,
-                               LLMName.GPT35TURBO, LLMName.GPT35TURBO0613]:
-            return OpenAi(self.model_name, self.token)
-        elif self.model_name == LLMName.IGEL:
-            return IGEL(self.token)
-        else:
-            raise ValueError(f"{self.model_name.value} is not supported yet.")
-
-
 class LLM:
     """
     Class representing a Language Model.
 
     Args:
-        model_name (LLMName): The name of the language model.
+        model_name (LLMConfig): The name of the language model.
         token (str, optional): The API auth_token for the language model. Defaults to None.
 
     Attributes:
-        model_name (LLMName): The name of the language model.
+        model_name (LLMConfig): The name of the language model.
         token (str): The API auth_token for the language model.
         model (Generator): The language model generator.
 
@@ -343,10 +350,21 @@ class LLM:
 
     """
 
-    def __init__(self, model_name: LLMName, token: str = None):
-        self.model_name: LLMName = model_name
-        self.token = token
-        self.model = GeneratorFactory(self.model_name).select_generator()
+    def __init__(self, model: LLMConfig, auth_token: str = None):
+        self.model_config: LLMConfig = model
+        self.auth_token = auth_token
+        self.model = self.match_model()
+
+    def match_model(self):
+        if self.model_config.family == "GPT":
+            return OpenAi(model=self.model_config, auth_token=self.auth_token)
+        elif self.model_config.family == "IGEL":
+            return IGEL(model=self.model_config, auth_token=self.auth_token)
+        else:
+            try:
+                return user_models[self.model_config.value](model=self.model_config, auth_token=self.auth_token)
+            except KeyError:
+                raise ValueError(f"{self.model.name} is not a registered LLM.")
 
     def prompt(self, prompt: str) -> str:
         """
@@ -358,13 +376,12 @@ class LLM:
         :rtype: str
         """
         return self.model.prompt(prompt)
-    
+
     def chat(self, prompt: str) -> str:
         return self.model.chat(prompt)
 
     def new_chat(self):
         self.model.history.reset()
-    
 
 
 class Role(Enum):
@@ -373,13 +390,13 @@ class Role(Enum):
 
 
 class ChatHistory:
-    def __init__(self, model_name: LLMName):
+    def __init__(self, model_name: LLMConfig):
         self._history: List[Dict] = []
         self.model_name = model_name
 
     def add(self, role: Role, message: str):
         self._history.append({"role": role.value, "content": message})
-    
+
     def reset(self):
         self._history = []
 
