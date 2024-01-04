@@ -178,9 +178,13 @@ class SentenceTransformer(Embedder):
         }
 
         response = requests.post(f'{self.endpoint}/create_embeddings',
-                                 headers=headers, json=json_data).json()
+                                 headers=headers, json=json_data)
+
+        if response.status_code != 200:
+            raise ConnectionError(f"Connection to the Embedder API returned status code {response.status_code}.")
+
         try:
-            response = response["content"]
+            response = response.json()["content"]
         except KeyError:
             raise ValueError("The Embedding service did not return any results. Please make sure your token is correct"
                              " and embedding_source is of a meaningful format.")
