@@ -218,7 +218,29 @@ class Generator:
         raise NotImplementedError("Please implement the prompt method.")
 
     def chat(self, prompt: str) -> str:
-        raise NotImplementedError("Please implement the chat method.")
+        logging.warning("You are using the generic chat functionality. Please consider that it is not optimized in any"
+                        "way and may lead to unexpected behaviour of the language model. It is especially likely that "
+                        "information from older messages may diffuse into the model's responses."
+                        "Please use models from the GPT family if you want to have reliable chat functionality.")
+
+
+        history_template = ("\nThe following list is the history of our conversation so far. Messages starting with 'user'"
+                            " are written by me, the user. Messages starting with system: are written by you, the language"
+                            " model. Please use this information if you need context from our earlier conversation. If not"
+                            " please ignore those messages.\n")
+
+        history = self.fit_to_context_window(prompt + history_template, self.history.get_content())
+
+        if len(history) > 0:
+            combined_prompt = prompt + history_template+ " " + "\n- ".join(history)
+        else:
+            combined_prompt = prompt
+
+        response = self.prompt(combined_prompt)
+
+        self.history.add(Role.USER, prompt)
+        self.history.add(Role.SYSTEM, response)
+        return response
 
 
 class OpenAi(Generator):
@@ -327,10 +349,6 @@ class IGEL(Generator):
         response.raise_for_status()
         return response.json()["response"]
 
-    def chat(self, prompt: str) -> str:
-        raise NotImplementedError("The IGEL Language Model does not support chat messages. Please use a model from the "
-                                  "GPT or BARD Family instead.")
-
 
 class LLM:
     """
@@ -403,9 +421,5 @@ class ChatHistory:
     def get_content(self):
         if self.model_name.family == "GPT":
             return self._history
-        elif self.model_name.family == "IGEL":
-            raise NotImplementedError("IGEL is not implemented yet")
-        elif self.model_name.family == "BARD":
-            raise NotImplementedError("BARD is not implemented yet")
-        elif self.model_name.family == "":
-            raise ValueError("Unknown Model.")
+        else:
+            return [f"{x['role']}: {x['content']}" for x in self._history]
