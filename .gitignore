@@ -160,3 +160,4 @@ cython_debug/
 .env
 adapter
 docs/build
+.pypirc
