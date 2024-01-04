@@ -1,7 +1,7 @@
 .. brdata-rag-tools documentation main file, created by
-   sphinx-quickstart on Thu Dec  7 18:15:58 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+sphinx-quickstart on Thu Dec  7 18:15:58 2023.
+You can adapt this file completely to your liking, but it should at least
+contain the root `toctree` directive.
 
 .. highlight:: python
 
@@ -307,6 +307,90 @@ If the context is too long, the function will pop the last elements of your cont
     context = language_model.model.fit_to_context_window(prompt_template + user_prompt, context)
 
 Simply use this function before you pass the context to the LLM.
+
+Registering your own Language Model
+-----------------------------------
+
+If you have your own Language Model deployed you may want to use it with this library.
+
+This library assumes that a language model is available through an REST API. In principle you mal also run it locally.
+You may need to fill in some dummy values in the connection related fields in the upcoming example.
+
+To register your own model you need to inherit from the Generator class in the models package.
+
+The most simple way to do so is as following. Your init method needs the paramters `model` and `auth_token`.
+Those parameters are then passed to the init function of the `super` or parent class:
+
+.. code-block:: python
+
+    from brdata_rag_tools.models import Generator
+
+    class Bison(Generator):
+        def __init__(self, model, auth_token):
+            super().__init__(model=model,
+                             auth_token=auth_token)
+
+Those parameters are needed internally. `model` will hold the `LLMCofig` class and `auth_token` the token to connect to
+the REST API. Optional parameters you may pass are the following.
+
+- temperature: float
+- max_new_tokens: int
+- top_p: float
+- top_k: int
+- length_penalty: float
+- number_of_responses: int
+- max_token_length: int
+
+Those are only used by your service, so you don't have to stick too closely to the definitions, but for the sake of reusability
+it is advised not to overload these parameters. You can always introduce your own parameters if you need to.
+
+Each `Generator` needs a prompt method. In this method you query your service with the parameters you've specified above.
+
+The `prompt()`-Method is usually just a wrapper around your REST API. If you choose to run the model locally you may also
+query it directly from here.
+
+The `prompt()` method should take a string as input and should return a string.
+
+.. code-block:: python
+
+    class Bison(models.Generator):
+        def __init__(self, model, auth_token):
+            super().__init__(model=model,
+                             temperature=1.0,
+                             max_new_tokens=256,
+                             top_p=0.9,
+                             length_penalty=1.0,
+                             auth_token=auth_token)
+
+        def prompt(self, prompt: str) -> str:
+            import requests
+
+            headers = {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {self.auth_token}'
+            }
+
+            json_data = {
+                'id': str(time.time()),
+                'prompt': prompt,
+                'model_name': 'bison001',
+                'max_tokens': self.max_new_tokens,
+                'temperature': self.temperature,
+                'top_k': self.top_k,
+                'top_p': self.top_p,
+            }
+
+            response = requests.post('https://google-models-proxy.brdata-dev.de/v1/bison', headers=headers,
+                                     json=json_data)
+
+            return response.json()["response"]
+
+
+If your model supports chat functionality, you can also implement a `chat()` method.
+
+If you choose not to, the generic chat method will be used by adding the chat history to the end of your prompt.
+This will not produce the best results and may also confuse the model. Use at your own risk.
 
 Indices and tables
 ==================
