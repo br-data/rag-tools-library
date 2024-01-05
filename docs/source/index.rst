@@ -185,9 +185,9 @@ Transformers, which is fine tuned for cosine similarity comparison of German tex
 
 .. code-block:: python
 
-   from brdata_rag_tools.embeddings import EmbeddingType
+   from brdata_rag_tools.embeddings import EmbeddingConfig
 
-   embedding = EmbeddingType.SENTENCE_TRANSFORMERS
+   embedding = EmbeddingConfig.SENTENCE_TRANSFORMERS
 
    embeding_table = database.create_abstract_embedding_table(embed_type=embedding)
 
