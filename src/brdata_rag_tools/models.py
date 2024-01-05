@@ -7,7 +7,7 @@ import requests
 import logging
 
 
-def register(model, name=None, max_input_tokens=None, family=None):
+def register(model, name=None, max_input_tokens=None, family="USER"):
     extend_enum(LLMConfig, name.upper(), name)
     user_models[name] = model
 
