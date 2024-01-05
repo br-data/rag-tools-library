@@ -372,14 +372,14 @@ Simply use this function before you pass the context to the LLM.
 Registering your own Language Model
 -----------------------------------
 
-If you have your own Language Model deployed you may want to use it with this library.
+If you have your own Language Model deployed, you may want to use it with this library.
 
 This library assumes that a language model is available through an REST API. In principle you mal also run it locally.
 You may need to fill in some dummy values in the connection related fields in the upcoming example.
 
 To register your own model you need to inherit from the Generator class in the models package.
 
-The most simple way to do so is as following. Your init method needs the paramters `model` and `auth_token`.
+The most simple way to do so is as follows. Your init method needs the paramters `model` and `auth_token`.
 Those parameters are then passed to the init function of the `super` or parent class:
 
 .. code-block:: python
@@ -452,6 +452,99 @@ If your model supports chat functionality, you can also implement a `chat()` met
 
 If you choose not to, the generic chat method will be used by adding the chat history to the end of your prompt.
 This will not produce the best results and may also confuse the model. Use at your own risk.
+
+Now that you've created your model, you need to register it as a last step. Use the `register` method from models.
+
+.. code-block:: python
+
+    from brdata_rag_tools.models import register
+    register(Bison, name="bison001", max_input_tokens=8192)
+
+You pass the method your Model class, and need to specify the name of your model and the maximum amount of tokens the
+model can handle as input.
+
+After registration you may use your model just as you would with any pre-registered model:
+
+.. code-block:: python
+
+    language_model = models.LLM(model=models.LLMConfig.BISON001, auth_token=os.environ.get("BISON_TOKEN"))
+
+    response = language_model.prompt("Mighty language model, what is your name?.")
+    print(response)
+
+
+Registering your own Embedding Models
+-------------------------------------
+
+Registering your own embedding model follows the same principles as with language models. You create your own embedding
+class by inheriting from the `Embedder` parent class.
+
+In this example we will not query an endpoint but only return a dummy value of `[1, 2, 3]` for each row.
+
+
+.. code-block:: python
+    from brdata_rag_tools.embeddings import Embedder
+
+    class Test(Embedder):
+        def __init__(self):
+            super().__init__(endpoint = "example.com", auth_token = None)
+
+
+The parent class expects two parameters which you need to pass:
+
+1. The `endpoint` under which the service is available. Since we don't call an external service here, we simply fill in
+a dummy value.
+2. The `auth_token` used for authentication to your service. We leave this with `None` here as we don't call an actual
+endpoint.
+
+Each embedder needs two methods:
+
+1. `create_embedding(text)` which takes a string as input and returns the embedding as numpy array. This method is used
+to create the embedding for your user prompt, which is used as an input to the database.
+2. `create_embedding_bulk(rows)` which takes a list of SQLAlchemy table classes as input and assigns the created embedding
+directly to the class's `embedding` attribute. This method is used for ingesting your data into the database. Those
+separate methods exist to allow you to optimize for large throughput during ingest and allows you to minimize the number
+of requests to your service.
+
+.. code-block:: python
+
+    class Test(Embedder):
+        def __init__(self):
+            super().__init__(endpoint = "example.com", auth_token = None)
+
+        def create_embedding_bulk(self, rows):
+        """
+        Takes an  list of SQLAlchemy Table classes as input and returns them with embeddings assigned.
+        """
+            for row in rows:
+                row.embedding = np.array([1, 2, 3])
+
+            return rows
+
+        def create_embedding(self, text: str) -> np.array:
+            return np.array([1, 2, 3])
+
+
+After you've created your class, you may register it using the `register` function from embeddings:
+
+.. code-block:: python
+
+    from brdata_rag_tools.embeddings import register
+
+    embeddings.register(Test, name = "test", dimensions = 3)
+
+You need to pass the name of your embedding model and the dimensionality to the register function.
+
+Then you can use it just as you would with the pre-registered embedding methods. The name of your Embedder is always
+stored in all-caps in the selection Enum.
+
+.. code-block:: python
+
+    embed_type = EmbeddingConfig.TEST
+
+    database = databases.FAISS()
+    EmbeddingTable = database.create_abstract_embedding_table(embed_type=embed_type)
+
 
 Indices and tables
 ==================
