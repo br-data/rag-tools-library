@@ -1,36 +1,54 @@
 import os
-from enum import Enum
+from aenum import Enum, extend_enum
 from typing import List, Optional, Type
 
 import numpy as np
 import requests
+import logging
 
 from .datastructures import BaseClass
 
+embedding_data = {
+    "sentence_transformer": {
+        "dimension": 1024
+    },
+}
 
-class EmbeddingType(Enum):
+user_models = {}
+
+
+def register(model, name=None, dimension: int = None):
+    extend_enum(EmbeddingConfig, name.upper(), name)
+    user_models[name] = model
+
+    embedding_data[name] = {
+        "dimension": dimension
+    }
+
+    logging.info(f"Successfully registered model {name}.")
+
+
+class EmbeddingConfig(Enum):
     """
-    The EmbeddingType class is an enumeration that represents different types of embeddings.
+    The EmbeddingConfig class is an enumeration that represents different types of embeddings.
     It is used to define the type of embedding model to be used in a text processing task.
 
     ### Attributes:
 
-    - SENTENCE_TRANSFORMERS (EmbeddingType): Represents the Sentence Transformers embedding model.
-    - TF_IDF (EmbeddingType): Represents the TF-IDF embedding model.
-    - TEST (EmbeddingType): Represents a test embedding model.
+    - SENTENCE_TRANSFORMERS (EmbeddingConfig): Represents the Sentence Transformers embedding model.
+    - TF_IDF (EmbeddingConfig): Represents the TF-IDF embedding model.
 
     Example Usage::
 
         import test
 
-        embedding_type = EmbeddingType.SENTENCE_TRANSFORMERS
+        embedding_type = EmbeddingConfig.SENTENCE_TRANSFORMERS
         dimension = embedding_type.dimension
         model = embedding_type.model
 
     """
     SENTENCE_TRANSFORMERS = "sentence_transformers"
     TF_IDF = "tfidf"
-    TEST = "test"
 
     @property
     def dimension(self):
@@ -40,24 +58,22 @@ class EmbeddingType(Enum):
         :return: The dimension of the input.
         :rtype: int
         """
-        if self == self.SENTENCE_TRANSFORMERS:
-            return SentenceTransformer().dimension
-        if self == self.TF_IDF:
-            return 768
-        if self == self.TEST:
-            return Test().dimension
+        return embedding_data[self.value]["dimension"]
 
     @property
     def model(self):
         """
-        :return: An instance of the used language model.
+        :return: An instance of the used embedding model.
         """
         if self == self.SENTENCE_TRANSFORMERS:
             return SentenceTransformer()
-        if self == self.TF_IDF:
+        elif self == self.TF_IDF:
             raise NotImplementedError()
-        if self == self.TEST:
-            return Test()
+        else:
+            try:
+                return user_models[self.value]()
+            except KeyError:
+                raise KeyError(f"No embedding model with name {self.value} found.")
 
 
 class Embedder:
@@ -76,12 +92,9 @@ class Embedder:
     :return: None
     """
 
-    def __init__(self, endpoint: str, dimension: int, token: Optional[str] = None,
-                 max_prompt_tokens: Optional[int] = None):
+    def __init__(self, endpoint: str, auth_token: Optional[str] = None):
         self.endpoint = endpoint
-        self.dimension = dimension
-        self.token = token
-        self.max_prompt_tokens = max_prompt_tokens
+        self.auth_token = auth_token
 
     def create_embedding_bulk(self, rows: List[Type[BaseClass]]) -> List[
         Type[BaseClass]]:
@@ -109,8 +122,8 @@ class SentenceTransformer(Embedder):
     """
 
     def __init__(self):
-        super().__init__(endpoint="https://gbert-cosine-embeddings.brdata-dev.de", dimension=1024,
-                         token=os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
+        super().__init__(endpoint="https://gbert-cosine-embeddings.brdata-dev.de",
+                         auth_token=os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
 
     def create_embedding(self, text: str) -> np.array:
         """
@@ -120,7 +133,7 @@ class SentenceTransformer(Embedder):
         headers = {
             'accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self.token}'
+            'Authorization': f'Bearer {self.auth_token}'
         }
 
         json_data = {
@@ -151,22 +164,24 @@ class SentenceTransformer(Embedder):
             raise NotImplementedError(
                 "Sorry, only 250 rows may be processed at one time.")
 
-        if self.token is None:
-            raise ValueError("No Access token specified. Please set `SENTENCE_TRANSFORMER_TOKEN` environment variable.")
+        if self.auth_token is None:
+            raise ValueError(
+                "No Access auth_token specified. Please set `SENTENCE_TRANSFORMER_TOKEN` environment variable.")
 
         headers = {
             'accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self.token}'
+            'Authorization': f'Bearer {self.auth_token}'
         }
 
         content = []
         for row in rows:
 
             if row.id is None or row.embedding_source is None:
-                raise ValueError("ID or embedding source is missing. Please provide an ID or embedding source in your table"
-                                 "definition as described here with the declaration of podcast1: "
-                                 "https://br-data.github.io/rag-tools-library/#augmenting-your-prompt.")
+                raise ValueError(
+                    "ID or embedding source is missing. Please provide an ID or embedding source in your table"
+                    "definition as described here with the declaration of podcast1: "
+                    "https://br-data.github.io/rag-tools-library/#augmenting-your-prompt.")
 
             content.append({
                 'id': row.id,
@@ -186,8 +201,9 @@ class SentenceTransformer(Embedder):
         try:
             response = response.json()["content"]
         except KeyError:
-            raise ValueError("The Embedding service did not return any results. Please make sure your token is correct"
-                             " and embedding_source is of a meaningful format.")
+            raise ValueError(
+                "The Embedding service did not return any results. Please make sure your auth_token is correct"
+                " and embedding_source is of a meaningful format.")
 
         for i, text_element in enumerate(response):
             if rows[i].id == text_element["id"]:
@@ -198,50 +214,3 @@ class SentenceTransformer(Embedder):
         return rows
 
 
-class Test(Embedder):
-    """
-    This class represents a Test class that inherits from Embedder class.
-
-    Args:
-        None
-
-    Attributes:
-        None
-
-    """
-
-    def __init__(self, dimension: int = 3):
-        super().__init__("example.com", dimension, None)
-
-    def create_embedding_bulk(self, rows: List[Type[BaseClass]]) -> List[
-        Type[BaseClass]]:
-        """
-        Create embeddings for a list of rows.
-
-        :param rows: A list of rows, each row should be an instance of the BaseClass.
-        :return: A list of rows with updated embeddings.
-        :raises ValueError: If the endpoint of any row does not match the current endpoint.
-
-        """
-        rows_wo_embedding = [x for x in rows if x.embedding is None]
-        rows_w_embedding = [x for x in rows if x.embedding is not None]
-
-        for row in rows_wo_embedding:
-            if row.embedding_type.model.endpoint != self.endpoint:
-                raise ValueError(
-                    f"Can't create an embedding with type {row.embedding_type.value} from endpoint {self.endpoint}.")
-            row.embedding = np.array([1, 2, 3])
-
-        return rows_w_embedding + rows_wo_embedding
-
-    def create_embedding(self, text: str) -> np.array:
-        """
-        Create an embedding for the given text.
-
-        :param text: The text to create an embedding for.
-        :type text: str
-        :return: A 3-dimensional numpy array with the values 1, 2 and 3.
-        :rtype: numpy.array
-        """
-        return np.array([1, 2, 3])
-        # return np.random.random(self.dimension).astype("float32")
