@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, Mapped, mapped_column
 
 from .datastructures import Base, BaseClass
-from .embeddings import EmbeddingType
+from .embeddings import EmbeddingConfig
 
 
 class Database:
@@ -35,7 +35,7 @@ class Database:
         elif type(self) == FAISS:
             return BLOB
 
-    def create_abstract_embedding_table(self, embed_type: EmbeddingType):
+    def create_abstract_embedding_table(self, embed_type: EmbeddingConfig):
         """
         Create an abstract embedding table. Use it to inherit your own database tables to use with the PGVector class.
 
@@ -98,7 +98,7 @@ class Database:
             session.commit()
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
-                                 embedding_type: EmbeddingType, limit: int = 50):
+                                 embedding_type: EmbeddingConfig, limit: int = 50):
         raise NotImplementedError()
 
     def get_ids_with_embedding(self, table: BaseClass):
@@ -197,7 +197,7 @@ class FAISS(Database):
                                  echo=self.verbose)
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
-                                 embedding_type: EmbeddingType,
+                                 embedding_type: EmbeddingConfig,
                                  limit: int = 50) -> Dict:
         """
         Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
@@ -297,7 +297,7 @@ class PGVector(Database):
             echo=self.verbose)
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
-                                 embedding_type: EmbeddingType, limit: int = 50):
+                                 embedding_type: EmbeddingConfig, limit: int = 50):
         """
         Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
         and queries the associated database for the most similar matches.
