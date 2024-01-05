@@ -79,8 +79,8 @@ class Generator:
 
     :param model: The language model to be used for text generation.
     :type model: LLMConfig
-    :param token: The API token to access the language model. If not provided, the token will be fetched based on the model value.
-    :type token: str, optional
+    :param auth_token: The API auth_token to access the language model. If not provided, the auth_token will be fetched based on the model value.
+    :type auth_token: str, optional
     :param temperature: The temperature parameter for text generation. A higher value (e.g., 1.0) makes the output more random, while a lower value (e.g., 0.2) makes it more focused and deterministic. If not provided, the default model's temperature will be used.
     :type temperature: float, optional
     :param max_new_tokens: The maximum number of new tokens to generate. If not provided, the default model's maximum new tokens value will be used.
@@ -96,8 +96,8 @@ class Generator:
 
     :ivar model: The language model to be used for text generation.
     :vartype model: LLMName
-    :ivar auth_token: The API token to access the language model.
-    :vartype token: str
+    :ivar auth_token: The API auth_token to access the language model.
+    :vartype auth_token: str
     :ivar temperature: The temperature parameter for text generation.
     :vartype temperature: float
     :ivar max_new_tokens: The maximum number of new tokens to generate.
@@ -179,7 +179,7 @@ class Generator:
         """
         Reduces a list of semantic search results to fit the context window of the given LLM.
 
-        Token lengths are estimated and may differ from the real token vector's length.
+        Token lengths are estimated and may differ from the real auth_token vector's length.
 
         Guesses for OpenAI models are more accurate than for other models.
 
@@ -249,8 +249,8 @@ class OpenAi(Generator):
 
     :param model: The name of the language model to use.
     :type model: LLMConfig
-    :param token: The API auth_token for accessing the OpenAi API.
-    :type token: str
+    :param auth_token: The API auth_token for accessing the OpenAi API.
+    :type auth_token: str
     """
 
     def __init__(self, model: LLMConfig, auth_token: str):
@@ -300,14 +300,14 @@ class IGEL(Generator):
     A class representing the IGEL generator.
 
     The IGEL generator is a type of generator that uses the LLMName.IGEL model to generate text.
-    It accepts a token for authentication and various parameters that control the generation process.
+    It accepts an auth_token for authentication and various parameters that control the generation process.
 
     Args:
-        token (str, optional): A token for authentication. Defaults to None.
+        auth_token (str, optional): A auth_token for authentication. Defaults to None.
 
     Attributes:
         model (LLMConfig): The model used by the IGEL generator.
-        auth_token (str): The token used for authentication.
+        auth_token (str): The auth_token used for authentication.
         temperature (float): The temperature parameter for generation.
         max_new_tokens (int): The maximum number of new tokens to generate.
         top_p (float): The top-p parameter for generation.
@@ -356,11 +356,11 @@ class LLM:
 
     Args:
         model_name (LLMConfig): The name of the language model.
-        token (str, optional): The API auth_token for the language model. Defaults to None.
+        auth_token (str, optional): The API auth_token for the language model. Defaults to None.
 
     Attributes:
         model_name (LLMConfig): The name of the language model.
-        token (str): The API auth_token for the language model.
+        auth_token (str): The API auth_token for the language model.
         model (Generator): The language model generator.
 
     Methods:
