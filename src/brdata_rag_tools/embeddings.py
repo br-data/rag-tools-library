@@ -9,7 +9,7 @@ import logging
 from .datastructures import BaseClass
 
 embedding_data = {
-    "sentence_transformer": {
+    "sentence_transformers": {
         "dimension": 1024
     },
 }
