@@ -12,24 +12,25 @@ Welcome to brdata-rag-tools's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+
 Tutorial
 ========
 
-Hello to the brdata-rag-tools tutorial. In this brief introduction I will show you how to use the library with a brief
-example.
+Introduction:
+-------------
 
-Installation
-------------
+Welcome to the brdata-rag-tools tutorial. In this brief introduction, I will guide you through using the library with a simple example.
 
-Since the package is hosted on the test instance of pypi, you need to pass the index-url parameter to pip:
+Installation:
+-------------
+
+To install the package from the test instance of PyPI, use the following command:
 
 .. code-block:: bash
 
    python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps brdata-rag-tools
 
-We install the package without dependencies since most of the dependencies are not hosted on the test instance of pypi.
-You may want to install it with the requirements.txt file from the github repository:
-https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
+Since most dependencies are not hosted on the test instance, install with the requirements.txt file from the GitHub repository: https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
 
 .. code-block:: bash
 
@@ -38,7 +39,7 @@ https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
 Basic Usage
 -----------
 
-First we choose which LLM we want to use by initiating the LLM class with a value from the LLMConfig enum.
+Choose the language model (LLM) you want by initiating the LLM class with a value from the LLMConfig enum.
 
 All LLMs from brdata-rag-tools are connected via an API. The library serves as a wrapper to make the models more easily
 accessible.
@@ -49,8 +50,7 @@ accessible.
 
    llm = LLM(model_name=LLMConfig.GPT35TURBO)
 
-In this example we chose the GPT 3.5 Turbo model, but different flavours of GPT 3 and 4 are available, as well as the
-fine tuned on german text model IGEL and Google's Bison models.
+Select the desired LLM, such as GPT 3.5 Turbo, GPT 3, GPT 4, IGEL, or Google's Bison models.
 
 All GPT models may be used by anyone with an API token, the IGEL and Bison Model is only accessible from BR Data's
 infrastructure.
@@ -67,7 +67,7 @@ The LLM class holds merely the token and the actual model class.
 
 The model class holds the actual logic and connections to interact with the language model endpoints.
 
-Now we already can interact with the model via the prompt method:
+Now, interact with the model using the `prompt` method:
 
 .. code-block:: python
 
@@ -78,7 +78,7 @@ Chat with the model
 -------------------
 
 Models of the GPT Family also support chat functionality – this means that models are aware of prompts sent earlier to
-the model. You may invoke chat functionality by the chat method.
+the model. Use the chat method.
 
 .. code-block:: python
 
@@ -87,8 +87,7 @@ the model. You may invoke chat functionality by the chat method.
    answer = llm.chat("What did I tell you in the last message?")
    print(answer)
 
-If you want to start a new chat and make the model forget what you've told it in earlier messages, you can start a new
-chat with the `new_chat` method.
+For a new chat and to make the model forget earlier messages, use the `new_chat` method:
 
 .. code-block:: python
 
@@ -98,7 +97,6 @@ chat with the `new_chat` method.
 
 Databases
 ----------
-
 We do not only want to talk to our LLM, we want to augment it's prompt. This means we want to query a database for
 relevant content.
 
@@ -110,22 +108,21 @@ to all vectors in the database and the most similar vectors are retrieved.
 
 You can choose of two different database types:
 
-1. PgVector a database based on Postgres with an extension for vector search. It is a good choice to use if you plan to
-build production services. You need to deploy the database yourself.
-2. SQLite with FAISS is a good choice if you want to try out something. While FAISS is a very capable library the usage
-in this library is not optimized for production.
+1. PgVector a database based on Postgres with an extension for vector search. It is a good choice to use if you plan to build production services. You need to deploy the database yourself.
+2. SQLite with FAISS is a good choice if you want to try out something. While FAISS is a very capable library the usage in this library is not optimized for production.
 
 FAISS and SQLite
 ~~~~~~~~~~~~~~~~
 
-To create your database simply import and invoke it. Without any parameters it will be a memory-only database.
-E.g. if you stop your program, the data will be lost.
+Create your database by importing and invoking it. Without any parameters it will be a memory-only database.
+This means, if you stop your program, the data will be lost.
 
 .. code-block:: python
     from brdata_rag_tools.databases import FAISS
     database = FAISS()
 
-To write your database to disk, use the database parameter and pass it the path.
+To write your database to disk, use the database parameter and pass it the path to your database file. If it does not
+exist, it will be created in the specified directory. You may use absolute or relative paths.
 
 .. code-block:: python
 
@@ -135,11 +132,20 @@ To write your database to disk, use the database parameter and pass it the path.
 PGVector
 ~~~~~~~~
 
-The easiest way to run it, if you're not on the BR data infrastructure is to run it via docker:
+The easiest way to run it, if you're not on the BR data infrastructure, is to run it via docker.
+
+The following command is not safe for a production environment! Don't use trust mode in critical applications.
 
 .. code-block:: bash
 
-   docker run -p 5432:5432 arkane/pgvector
+   docker run -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust ankane/pgvector
+
+Connect to the database with `psql` if you want to make sure pgvector is up and running
+
+.. code-block:: bash
+
+   psql -U postgres -h localhost -p 5432
+
 
 Follow the instructions to set a password or trust all hosts.
 
@@ -195,14 +201,7 @@ The database table
 ~~~~~~~~~~~~~~~~~~
 
 The returned abstract table is an SQLAlchemy table object. You may add your own Columns to it to store data additional
-to the three beforementioned items.
-
-.. code-block:: python
-
-   class Podcast(embedding_table):
-       __tablename__ = "podcast"
-       title: Mapped[str] = mapped_column(String)
-       url: Mapped[str] = mapped_column(String)
+to the three aforementioned items.
 
 Give the table any name you like using the __tablename__ attribute. This is the only necessary field. Other columns,
 like title and url in the example above, are introduced using the SQLAlchemy logic.
@@ -213,12 +212,15 @@ Next, create the tables in the database:
 
 .. code-block:: python
 
+   class Podcast(embedding_table):
+       __tablename__ = "podcast"
+       title: Mapped[str] = mapped_column(String)
+       url: Mapped[str] = mapped_column(String)
+
+   # Create tables
    database.create_tables()
 
-Now that we have made our Podcast Table class, we can actually fill it with content:
-
-.. code-block:: python
-
+   # Fill with content
    podcast1 = Podcast(title="TRUE CRIME - Under Suspicion",
                       id="1",
                       url="example.com",
@@ -234,6 +236,8 @@ Now that we have made our Podcast Table class, we can actually fill it with cont
                       url="bla.com",
                       embedding_source="In Crime Scene History, Niklas Fischer and Hannes Liebrandt, two historians from Ludwig Maximilian University in Munich, leave the lecture hall and travel back to exciting crimes from the past: a mysterious water corpse in the Berlin Landwehr Canal, young Stalin as the leader of a bloody robbery, or the hunt for a war criminal halfway around the world. True crime from history discussed in an entertaining way. The focus is on the question of what this actually has to do with us today. Crime Scene History is a podcast from Bayern 2 in collaboration with the Georg von Vollmar Academy.")
 
+   # Write to database
+   database.write_rows([podcast1, podcast2, podcast3])
 
 Since we ware using SQLAlchemy's Table classes, those tables are the exact representation of what will be stored in our
 database and we will interact only through those Table classes with the content from the vector store.
@@ -241,9 +245,6 @@ database and we will interact only through those Table classes with the content 
 Right now, we only have content in our tables and no embedding so far. The embedding is automatically computed when you
 send your table to the database:
 
-.. code-block:: python
-
-   database.write_rows([podcast1, podcast2, podcast3])
 
 Querying the database
 ---------------------
@@ -492,19 +493,14 @@ In this example we will not query an endpoint but only return a dummy value of `
 
 The parent class expects two parameters which you need to pass:
 
-1. The `endpoint` under which the service is available. Since we don't call an external service here, we simply fill in
-a dummy value.
-2. The `auth_token` used for authentication to your service. We leave this with `None` here as we don't call an actual
-endpoint.
+1. The `endpoint` under which the service is available. Since we don't call an external service here, we simply fill in a dummy value.
+2. The `auth_token` used for authentication to your service. We leave this with `None` here as we don't call an actual endpoint.
 
 Each embedder needs two methods:
 
-1. `create_embedding(text)` which takes a string as input and returns the embedding as numpy array. This method is used
-to create the embedding for your user prompt, which is used as an input to the database.
-2. `create_embedding_bulk(rows)` which takes a list of SQLAlchemy table classes as input and assigns the created embedding
-directly to the class's `embedding` attribute. This method is used for ingesting your data into the database. Those
-separate methods exist to allow you to optimize for large throughput during ingest and allows you to minimize the number
-of requests to your service.
+1. `create_embedding(text)` which takes a string as input and returns the embedding as numpy array. This method is used to create the embedding for your user prompt, which is used as an input to the database.
+2. `create_embedding_bulk(rows)` which takes a list of SQLAlchemy table classes as input and assigns the created embedding directly to the class's `embedding` attribute. This method is used for ingesting your data into the database. Those separate methods exist to allow you to optimize for large throughput during ingest and allows you to minimize the number of requests to your service.
+
 
 .. code-block:: python
 
