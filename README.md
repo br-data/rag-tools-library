@@ -13,7 +13,7 @@ You find a brief tutorial and the documentation under [br-data.github.io/rag-too
 - [x] Add an offline database alternative
   - [x] FAISS and SQLite
 - [x] Allow users to register their own LLMs 
-- [ ] Allow users to register their own Embedding models
+- [x] Allow users to register their own Embedding models
 - [ ] Support Semantic Scholar endpoint to generate embeddings for scientific papers.
 - [x] Support chat functionality; e.g. let the user give feedback on the result to the LLM.
 
