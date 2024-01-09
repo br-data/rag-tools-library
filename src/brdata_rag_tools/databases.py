@@ -180,10 +180,7 @@ class FAISS(Database):
             self.indices[table.__tablename__].embeddings.add(embedding)
             self.indices[table.__tablename__].ids.append(row.id)
 
-            newly_embedded[i].embedding = row.embedding.tobytes()
-
         with self.session() as session:
-            # session.execute(table.embedding.update().where(id = row.id).set(embedding = row.embedding.tobytes()))
 
             session.add_all(newly_embedded)
             session.flush()
@@ -239,7 +236,7 @@ class FAISS(Database):
         return dict_result
 
     def retrieve_embedding(self, row_id: str, table: BaseClass) -> np.array:
-        pass
+        raise NotImplementedError("retrieve_embedding is not implemented")
 
     def create_tables(self):
         self.metadata.create_all(self.engine)
