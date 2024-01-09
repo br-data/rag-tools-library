@@ -24,17 +24,18 @@ Welcome to the brdata-rag-tools tutorial. In this brief introduction, I will gui
 Installation:
 -------------
 
-To install the package from the test instance of PyPI, use the following command:
+To install the package run:
 
 .. code-block:: bash
+    # create virtual environment
+    python3 -m venv venv
 
-   python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps brdata-rag-tools
+    # Activate the virtual environment
+    source venv/bin/activate
 
-Since most dependencies are not hosted on the test instance, install with the requirements.txt file from the GitHub repository: https://github.com/br-data/rag-tools-library/blob/develop/docs/requirements.txt
+    # install the package
+    python3 -m pip install brdata-rag-tools
 
-.. code-block:: bash
-
-   pip install -r https://raw.githubusercontent.com/br-data/rag-tools-library/develop/docs/requirements.txt
 
 Basic Usage
 -----------
