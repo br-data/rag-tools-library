@@ -101,7 +101,7 @@ class Database:
                                  embedding_type: EmbeddingConfig, limit: int = 50):
         raise NotImplementedError()
 
-    def get_ids_with_embedding(self, table: BaseClass):
+    def get_existing_row_ids(self, table: BaseClass):
         """
         Get the IDs from the given table using the provided embedding.
 
@@ -129,15 +129,19 @@ class Database:
         :return: None
         """
         table = type(rows[0])
-        embedder = rows[0].embedding_type.model
+        if create_embeddings:
+            embedder = rows[0].embedding_type.model
 
-        rows_with_embedding = self.get_ids_with_embedding(table)
-        rows_wo_embedding = [x for x in rows if x.id not in rows_with_embedding]
+            rows_with_embedding = self.get_existing_row_ids(table)
+            rows_wo_embedding = [x for x in rows if x.id not in rows_with_embedding]
 
-        rows_wo_embedding = embedder.create_embedding_bulk(rows_wo_embedding)
+            rows_to_write = embedder.create_embedding_bulk(rows_wo_embedding)
+        else:
+            existing_rows = self.get_existing_row_ids(table)
+            rows_to_write = [x for x in rows if x.id not in existing_rows]
 
         with self.session() as session:
-            session.add_all(rows_wo_embedding)
+            session.add_all(rows_to_write)
             session.flush()
             session.commit()
 
@@ -167,7 +171,7 @@ class FAISS(Database):
         table = type(rows[0])
         embedder = rows[0].embedding_type.model
 
-        rows_with_embedding = self.get_ids_with_embedding(table)
+        rows_with_embedding = self.get_existing_row_ids(table)
         rows_wo_embedding = [x for x in rows if x.id not in rows_with_embedding]
 
         newly_embedded = embedder.create_embedding_bulk(rows_wo_embedding)
