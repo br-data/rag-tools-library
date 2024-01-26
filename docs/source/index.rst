@@ -1,4 +1,3 @@
-
 .. highlight:: python
 
 Welcome to brdata-rag-tools's documentation!
@@ -245,7 +244,37 @@ Since we ware using SQLAlchemy's Table classes, those tables are the exact repre
 database and we will interact only through those Table classes with the content from the vector store.
 
 Right now, we only have content in our tables and no embedding so far. The embedding is automatically computed when you
-send your table to the database:
+send your table to the database.
+
+Write sqlalchemy tables to DB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To create a normal table using SQLalchemy without embedding column follow the normal SQLalchemy procedure.
+
+Import the Base class from the `databases` module, not from SQLAlchemy itself.
+
+.. code-block:: python
+
+    # Import Base from databases module
+    from brdata_rag_tools.databases import Base
+
+    # Use Base as parent class for your table
+    class Person(Base):
+        __tablename__ = "person"
+        id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)
+        name: Mapped[str] = mapped_column(String)
+
+    # Create tables
+    database.create_tables()
+
+    # Create a row
+    person = Person(
+        id = "123",
+        name = "John Doe"
+    )
+
+    # Set create_embeddings=False to write row to DB
+    database.write_rows([person], create_embeddings=False)
 
 
 Querying the database
