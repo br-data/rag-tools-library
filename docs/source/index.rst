@@ -1,7 +1,3 @@
-.. brdata-rag-tools documentation main file, created by
-sphinx-quickstart on Thu Dec  7 18:15:58 2023.
-You can adapt this file completely to your liking, but it should at least
-contain the root `toctree` directive.
 
 .. highlight:: python
 
@@ -214,10 +210,14 @@ Next, create the tables in the database:
 
 .. code-block:: python
 
+   # Define database table
    class Podcast(embedding_table):
        __tablename__ = "podcast"
        title: Mapped[str] = mapped_column(String)
        url: Mapped[str] = mapped_column(String)
+       # Inherited from parent class:
+       # embedding_source: str
+       # embedding: Vector
 
    # Create tables
    database.create_tables()
