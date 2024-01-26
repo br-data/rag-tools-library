@@ -167,9 +167,6 @@ class SentenceTransformer(Embedder):
             raise NotImplementedError(
                 "Sorry, only 250 rows may be processed at one time.")
 
-        if self.auth_token is None:
-            raise ValueError(
-                "No Access auth_token specified. Please set `SENTENCE_TRANSFORMER_TOKEN` environment variable.")
 
         headers = {
             'accept': 'application/json',
