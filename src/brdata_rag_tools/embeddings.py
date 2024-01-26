@@ -122,8 +122,11 @@ class SentenceTransformer(Embedder):
     """
 
     def __init__(self):
-        super().__init__(endpoint="https://gbert-cosine-embeddings.brdata-dev.de",
+        super().__init__(endpoint=os.environ.get("SENTENCE_TRANSFORMER_ENDPOINT", "https://gbert-cosine-embeddings.brdata-dev.de"),
                          auth_token=os.environ.get("SENTENCE_TRANSFORMER_TOKEN"))
+
+        if self.auth_token is None:
+            logging.info("No auth token for Sentence Transformer was provided.")
 
     def create_embedding(self, text: str) -> np.array:
         """
