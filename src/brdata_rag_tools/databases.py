@@ -16,7 +16,7 @@ from .embeddings import EmbeddingConfig
 class Database:
     def __init__(self, user: str, database: str,
                  password: str, host: str, port: int,
-                 verbose: bool = False):
+                 verbose: bool = False, vector_type=None):
         self.user = user
         self.database = database
         self.password = os.environ.get(
@@ -28,12 +28,7 @@ class Database:
         self.embedding_table = None
         self.Base = Base
         self.metadata = Base.metadata
-
-    def _vector_type(self):
-        if type(self) == PGVector:
-            return Vector
-        elif type(self) == FAISS:
-            return BLOB
+        self.vector_type = vector_type
 
     def create_abstract_embedding_table(self, embed_type: EmbeddingConfig):
         """
@@ -43,8 +38,6 @@ class Database:
         :return: The abstract embedding table class.
         """
 
-        vector_type = self._vector_type()
-
         class EmbeddingTable(self.Base):
             embedding_type = embed_type
 
@@ -52,7 +45,7 @@ class Database:
             id: Mapped[str] = mapped_column(primary_key=True, unique=True)
             embedding_source: Mapped[str] = mapped_column(String)
             embedding: Mapped[np.array] = mapped_column(
-                vector_type(embedding_type.dimension)
+                self.vector_type(embedding_type.dimension)
             )
 
             def __repr__(self):
@@ -76,13 +69,14 @@ class Database:
         """
         raise NotImplementedError()
 
-    def session(self):
+    def session(self, **kw):
         """
         Initiates a new session with the database.
+        Any parameters will be passed directly to sqlalchemy's Session class.
 
         :return: Session object
         """
-        session = Session(self.engine)
+        session = Session(self.engine, **kw)
         return session
 
     def drop_table(self, name: str):
@@ -119,7 +113,7 @@ class Database:
     def retrieve_embedding(self, row_id: str, table: BaseClass) -> np.array:
         raise NotImplementedError()
 
-    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True):
+    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True, expunge=False):
         """
         Write rows to the database and optionally create embeddings for the rows.
 
@@ -142,7 +136,8 @@ class Database:
 
         with self.session() as session:
             session.add_all(rows_to_write)
-            session.flush()
+            if expunge:
+                session.expunge_all()
             session.commit()
 
 
@@ -155,7 +150,7 @@ class IndexWrapper:
 class FAISS(Database):
     def __init__(self, user: str = None, database: str = None, password: str = None,
                  host: str = None, port: int = None, verbose: bool = False):
-        super().__init__(user, database, password, host, port, verbose)
+        super().__init__(user, database, password, host, port, verbose, vector_type=BLOB)
 
         self.indices: Dict[str, IndexWrapper] = dict()
 
@@ -185,7 +180,6 @@ class FAISS(Database):
             self.indices[table.__tablename__].ids.append(row.id)
 
         with self.session() as session:
-
             session.add_all(newly_embedded)
             session.flush()
             session.commit()
@@ -199,7 +193,7 @@ class FAISS(Database):
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
                                  embedding_type: EmbeddingConfig,
-                                 limit: int = 50) -> Dict:
+                                 limit: int = 50) -> List:
         """
         Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
         and queries the associated database for the most similar matches.
@@ -281,7 +275,7 @@ class PGVector(Database):
     def __init__(self, user: str = "postgres", database: str = "postgres",
                  password: str = None, host: str = "localhost", port: int = 5432,
                  verbose: bool = False):
-        super().__init__(user, database, password, host, port, verbose)
+        super().__init__(user, database, password, host, port, verbose, vector_type=Vector)
 
         with self.session() as session:
             session.execute(text('CREATE EXTENSION IF NOT EXISTS vector;'))
