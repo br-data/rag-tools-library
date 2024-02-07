@@ -113,7 +113,7 @@ class Database:
     def retrieve_embedding(self, row_id: str, table: BaseClass) -> np.array:
         raise NotImplementedError()
 
-    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True, expunge=False):
+    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True, expunge=False, expire=True):
         """
         Write rows to the database and optionally create embeddings for the rows.
 
@@ -134,12 +134,11 @@ class Database:
             existing_rows = self.get_existing_row_ids(table)
             rows_to_write = [x for x in rows if x.id not in existing_rows]
 
-        with self.session() as session:
+        with self.session(expire_on_commit=expire) as session:
             session.add_all(rows_to_write)
+            session.commit()
             if expunge:
                 session.expunge_all()
-            session.commit()
-
 
 @dataclass
 class IndexWrapper:
@@ -154,7 +153,7 @@ class FAISS(Database):
 
         self.indices: Dict[str, IndexWrapper] = dict()
 
-    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True):
+    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True, expunge=True, expire=True):
         """
         Write rows to the database and optionally create embeddings for the rows.
 
@@ -179,10 +178,12 @@ class FAISS(Database):
             self.indices[table.__tablename__].embeddings.add(embedding)
             self.indices[table.__tablename__].ids.append(row.id)
 
-        with self.session() as session:
+        with self.session(expire_on_commit=expire) as session:
             session.add_all(newly_embedded)
             session.flush()
             session.commit()
+            if expunge:
+                session.expunge_all()
 
     def _create_engine(self):
         if self.database is None:
