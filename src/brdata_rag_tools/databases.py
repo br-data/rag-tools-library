@@ -92,7 +92,7 @@ class Database:
             session.commit()
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
-                                 embedding_type: EmbeddingConfig, limit: int = 50):
+                                 embedding_type: EmbeddingConfig, limit: int = 50, threshold: float = None):
         raise NotImplementedError()
 
     def get_existing_row_ids(self, table: BaseClass):
@@ -193,7 +193,7 @@ class FAISS(Database):
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
                                  embedding_type: EmbeddingConfig,
-                                 limit: int = 50) -> List:
+                                 limit: int = 50, max_dist: float = None) -> List:
         """
         Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
         and queries the associated database for the most similar matches.
@@ -228,8 +228,9 @@ class FAISS(Database):
         for i, row in enumerate(results):
             results[i][0].embedding = np.frombuffer(row[0].embedding)
             d = results[i]._asdict()
-            d["cosine_dist"] = distances[i]
-            dict_result.append(d)
+            if max_dist is not None and distances[i] < max_dist:
+                d["cosine_dist"] = distances[i]
+                dict_result.append(d)
 
         return dict_result
 
@@ -292,7 +293,7 @@ class PGVector(Database):
             echo=self.verbose)
 
     def retrieve_similar_content(self, prompt, table: Type[BaseClass],
-                                 embedding_type: EmbeddingConfig, limit: int = 50):
+                                 embedding_type: EmbeddingConfig, limit: int = 50, max_dist: float = None):
         """
         Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
         and queries the associated database for the most similar matches.
@@ -310,6 +311,12 @@ class PGVector(Database):
             results = session.execute(select(table, table.embedding.cosine_distance(
                 prompt_embedding).label("cosine_dist")).order_by("cosine_dist").limit(
                 limit)).all()
+
+        for i in range(len(results)):
+            if max_dist <= results[i].cosine_dist:
+                results = results[:i]
+                break
+
         return [x._asdict() for x in results]
 
     def retrieve_embedding(self, row_id: str, table: BaseClass) -> np.array:
