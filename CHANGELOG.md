@@ -12,5 +12,9 @@
 - Users may now inherit from PGVector and FAISS classes 
   (#3)[https://github.com/br-data/rag-tools-library/issues/3]
 
+## 0.1.3 -> 0.1.4
+- Allow users to pass a maximum cosine distance to the database.retrieve_similar_content() method.
 
-
+## 0.1.4 -> 0.1.4.1
+- Added parameters to handle the lifecycle of DB objects. Since SQLAlchemy expires objects after commiting they can't 
+be accessed anymore. The `expire_on_commit=False` parameter disables this behaviour.
