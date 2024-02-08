@@ -18,3 +18,7 @@
 ## 0.1.4 -> 0.1.4.1
 - Added parameters to handle the lifecycle of DB objects. Since SQLAlchemy expires objects after commiting they can't 
 be accessed anymore. The `expire_on_commit=False` parameter disables this behaviour.
+
+## 0.1.4 -> 0.1.4.2
+- Fixed a bug with which it was not possible to init the model without passing a auth token
+- IGEL now also accepts "IGEL_URL" to query the llm endpoint.

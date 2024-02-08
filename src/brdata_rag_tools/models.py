@@ -254,6 +254,7 @@ class OpenAi(Generator):
     """
 
     def __init__(self, model: LLMConfig, auth_token: str):
+        self.model = model
         super().__init__(
             model=model,
             auth_token=auth_token,
@@ -319,6 +320,7 @@ class IGEL(Generator):
     """
 
     def __init__(self, model, auth_token=None):
+        self.model = model
         super().__init__(
             model=model,
             temperature=1.0,
@@ -342,7 +344,7 @@ class IGEL(Generator):
         }
 
         response = requests.post(
-            "https://modelhub-gpu.brdata-dev.de/v1/prompt", headers=headers,
+            os.environ.get("IGEL_URL", "https://modelhub-gpu.brdata-dev.de/v1/prompt"), headers=headers,
             json=data
         )
 
