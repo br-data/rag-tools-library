@@ -175,13 +175,16 @@ class Generator:
         else:
             return self._estimate_tokens_rough(text)
 
-    def fit_to_context_window(self, prompt: str, context: List[str]) -> List[str]:
+    def fit_to_context_window(self, prompt: str, context: List[str], requested_completion_length: int = 0) -> List[str]:
         """
         Reduces a list of semantic search results to fit the context window of the given LLM.
 
         Token lengths are estimated and may differ from the real auth_token vector's length.
 
         Guesses for OpenAI models are more accurate than for other models.
+
+        The requested_completion_lenght aligns with OpenAI's max_new_tokens parameter. The length of the generated
+        response is added to the original prompt, if the answer gets too long, OpenAI returns an error.
 
         :param prompt: Your prompt for the LLM
         :param context: The context retrieved by the semantic search.
@@ -194,7 +197,7 @@ class Generator:
         while not context_window_fit:
             temp = prompt + " " + " ".join(context)
 
-            if self.estimate_tokens(temp) <= self.model.max_input_tokens:
+            if self.estimate_tokens(temp) <= self.model.max_input_tokens - requested_completion_length:
                 context_window_fit = True
             else:
                 try:
