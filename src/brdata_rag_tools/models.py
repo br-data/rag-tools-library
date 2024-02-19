@@ -2,7 +2,7 @@ import os
 from aenum import Enum, extend_enum
 import tiktoken
 from typing import List, Dict
-from openai import OpenAI as oai
+from openai import OpenAI as oai, BadRequestError
 import requests
 import logging
 
@@ -175,7 +175,7 @@ class Generator:
         else:
             return self._estimate_tokens_rough(text)
 
-    def fit_to_context_window(self, prompt: str, context: List[str], requested_completion_length: int = 0) -> List[str]:
+    def fit_to_context_window(self, prompt: str, context: List[str], requested_completion_length: int = None) -> List[str]:
         """
         Reduces a list of semantic search results to fit the context window of the given LLM.
 
@@ -191,6 +191,10 @@ class Generator:
         :return: The reduced context
         :raises ValueError: If the prompt is too long to fit any context
         """
+
+        if requested_completion_length is None:
+            requested_completion_length = self.max_new_tokens
+
 
         context_window_fit = False
 
@@ -271,14 +275,21 @@ class OpenAi(Generator):
     def prompt(self, prompt: str) -> str:
         """Generate text with GPT model family."""
 
-        gen_response = self.client.chat.completions.create(
-            model=self.model.value,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=self.temperature,
-            max_tokens=self.max_new_tokens,
-            top_p=self.top_p,
-            n=self.number_of_responses,
-        )
+        try:
+            gen_response = self.client.chat.completions.create(
+                model=self.model.value,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=self.temperature,
+                max_tokens=self.max_new_tokens,
+                top_p=self.top_p,
+                n=self.number_of_responses,
+            )
+        except BadRequestError as e:
+            if e.code == "context_length_exceeded":
+                logging.error("Your prompt exceeds the maximum content length of this language model."
+                              "Try to use the .fit_to_context_window() method of the language model.")
+                raise e
+
 
         return gen_response.choices[0].message.content
 
