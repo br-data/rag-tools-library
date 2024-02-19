@@ -19,6 +19,10 @@
 - Added parameters to handle the lifecycle of DB objects. Since SQLAlchemy expires objects after commiting they can't 
 be accessed anymore. The `expire_on_commit=False` parameter disables this behaviour.
 
-## 0.1.4 -> 0.1.4.2
+## 0.1.4.1 -> 0.1.4.2
 - Fixed a bug with which it was not possible to init the model without passing a auth token
 - IGEL now also accepts "IGEL_URL" to query the llm endpoint.
+
+## 0.1.4.2 -> 0.1.5
+- Closed issues [2](https://github.com/br-data/rag-tools-library/issues/2) and [10](https://github.com/br-data/rag-tools-library/issues/10)
+by considering the max_new_tokens param in the `fit_to_context_window()` method. 
