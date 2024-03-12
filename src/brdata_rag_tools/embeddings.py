@@ -12,6 +12,9 @@ embedding_data = {
     "sentence_transformers": {
         "dimension": 1024
     },
+    "ChromaEmbedder": {
+        "dimension": 1024  # not sure... XXX
+    },
 }
 
 user_models = {}
@@ -49,6 +52,7 @@ class EmbeddingConfig(Enum):
     """
     SENTENCE_TRANSFORMERS = "sentence_transformers"
     TF_IDF = "tfidf"
+    CHROMAEMBEDDER = "ChromaEmbedder"
 
     @property
     def dimension(self):
@@ -69,6 +73,8 @@ class EmbeddingConfig(Enum):
             return SentenceTransformer()
         elif self == self.TF_IDF:
             raise NotImplementedError()
+        elif self == self.CHROMAEMBEDDER:
+            return ChromaEmbedder()
         else:
             try:
                 return user_models[self.value]()
@@ -213,4 +219,14 @@ class SentenceTransformer(Embedder):
 
         return rows
 
+class ChromaEmbedder(Embedder):
+    # Chroma's own embedder, no need for implementation
+    def __init__(self, endpoint: str = None, auth_token: Optional[str] = None):
+        self.endpoint = ""
+        self.auth_token = ""
 
+    def create_embedding_bulk(self, rows: List[Type[BaseClass]]):
+        raise NotImplementedError()
+
+    def create_embedding(self, text: str) -> np.array:
+        raise NotImplementedError()

@@ -5,6 +5,10 @@ from typing import List, Type, Dict
 import faiss
 import numpy as np
 from pgvector.sqlalchemy import Vector
+
+import chromadb
+from chromadb.api.types import Where
+
 from sqlalchemy import String, text, BLOB
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, Mapped, mapped_column
@@ -139,6 +143,7 @@ class Database:
             session.commit()
             if expunge:
                 session.expunge_all()
+
 
 @dataclass
 class IndexWrapper:
@@ -334,3 +339,178 @@ class PGVector(Database):
                 table.id == row_id).first()
 
         return embedding
+
+
+class Chroma(Database):
+    """
+    This class represents a locally run ChromaDB.
+
+    :param user: The username to connect to the database, if run as a different service.
+    :type user: str
+    :param database: The name of the database to connect to, if run as a different service.
+    :type database: str
+    :param password: The password to connect to the database, if run as a different service. If not provided, it will use the value of the "DATABASE_PASSWORD" environment variable.
+    :type password: str
+    :param host: The host address of the database, if run as a different service. Default is "localhost".
+    :type host: str
+    :param port: The port number of the database, if run as a different service. Default is 8000.
+    :type port: int
+    :param verbose: Whether to enable verbose output. Default is False.
+    :type verbose: bool
+    """
+    def __init__(self, user: str = None, database: str = None, password: str = None,
+                 host: str = None, port: int = None, verbose: bool = False):
+        super().__init__(user, database, password, host, port, verbose, vector_type=Vector)
+
+    def _create_engine(self):
+        if self.database:
+            # run productively
+            return chromadb.PersistentClient(path=self.database)
+        else:
+            # run for test purposes without persistence
+            return chromadb.Client()
+
+    def write_rows(self, rows: List[Type[BaseClass]], create_embeddings: bool = True, expunge=False, expire=True):
+        """
+        Write rows to the database and optionally create embeddings for the rows.
+
+        :param rows: A list of rows to be written to the database. Rows must be instances of BaseClass or its subclasses.
+        :param create_embeddings: A boolean value indicating whether embeddings should be created for the rows.
+                                  Default value is True.
+        :return: None
+        """
+        table = type(rows[0])
+        collection = self.engine.get_or_create_collection(name=table.__name__, metadata={"hnsw:space": "cosine"})  # https://docs.trychroma.com/usage-guide#changing-the-distance-function
+
+        rows_with_embedding = self.get_existing_row_ids(table)
+        rows_wo_embedding = [x for x in rows if x.id not in rows_with_embedding]
+
+        embedder = rows[0].embedding_type.model
+        custom_embedder = type(embedder).__name__ != 'ChromaEmbedder'
+
+        if custom_embedder:
+            newly_embedded = embedder.create_embedding_bulk(rows_wo_embedding)
+        else:
+            newly_embedded = rows_wo_embedding
+
+        for i, row in enumerate(newly_embedded):
+            # kill unneeded metadata from class
+            # not very elegant, i guess ;-)
+            metadata = row.__dict__.copy()
+            del metadata['id']
+            del metadata['embedding_source']
+            if custom_embedder:
+                del metadata['embedding']
+            internal_keys = [k for k in list(metadata.keys()) if k.startswith("_")]
+            for ik in internal_keys:
+                del metadata[ik]
+
+            # ChromaDB does not accept some kind of metadata, so change to str
+            dt = [k for k, v in metadata.items() if type(v) not in [str, float, int, bool]]
+            for d in dt:
+                metadata[d] = str(metadata[d])
+
+            if custom_embedder:
+                collection.add(documents=str(row.embedding_source),
+                               embeddings=list(row.embedding),
+                               metadatas=metadata,
+                               ids=row.id
+                               )
+            else:
+                # use ChromaDB's own embedding
+                collection.add(documents=str(row.embedding_source),
+                               metadatas=metadata,
+                               ids=row.id
+                               )
+
+    def update_rows(self, entries: List, update_metadatas: bool = False):
+        """
+        Update Entries
+
+        :return: None
+        """
+        table = type(entries[0])
+
+        collection = self.engine.get_collection(name=table.__name__)
+
+        ids = []
+        metadatas = []
+        for e in entries:
+            # kill unneeded metadata from class
+            # XXX not very elegant, i guess ;-)
+            ids.append(e.id)
+            metadata = e.__dict__.copy()
+            del metadata['id']
+            internal_keys = [k for k in list(metadata.keys()) if k.startswith("_")]
+            for ik in internal_keys:
+                del metadata[ik]
+
+            # ChromaDB does not accept some kind of metadata, so change to str
+            dt = [k for k, v in metadata.items() if type(v) not in [str, float, int, bool]]
+            for d in dt:
+                metadata[d] = str(metadata[d])
+            metadatas.append(metadata)
+
+        collection.update(ids=ids,
+                          metadatas=metadatas,
+                          )
+
+    def retrieve_similar_content(self, prompt, table: Type[BaseClass],
+                                 embedding_type: EmbeddingConfig = None,
+                                 limit: int = 50, max_dist: float = 100, where: Where = {}) -> List:
+        """
+        Retrieve similar content based on a prompt. The function creates an embedding with the specified embedding type
+        and queries the associated database for the most similar matches.
+
+        :param prompt: The prompt for which similar content needs to be found.
+        :param table: The table in which the content is stored.
+        :param embedding_type: The type of embedding to be used. (default: None, stored in table class)
+        :param limit: The maximum number of similar content to be retrieved (default: 50).
+        :param max_dist: The maximum cosine distance between embedding vectors (default: 100)
+        :param: where: query metadata parameters, see chromadb docs for details
+        :return: A list of results containing similar content.
+        """
+        if embedding_type:
+            embedder = embedding_type.model
+        else:
+            embedder = table.embedding_type.model
+
+        custom_embedder = type(embedder).__name__ != 'ChromaEmbedder'
+        collection = self.engine.get_or_create_collection(name=table.__name__)
+
+        if custom_embedder:
+            prompt_embedding = list(embedder.create_embedding(prompt))
+            query = collection.query(query_embeddings=[prompt_embedding], n_results=limit, where=where)
+        else:
+            # Use ChromaDB´s own embedder
+            query = collection.query(query_texts=[prompt], n_results=limit, where=where)
+
+        results = []
+        if len(query) > 0:
+            documents = query['documents'][0]
+            metadatas = query['metadatas'][0]
+            distances = query['distances'][0]
+            for i, id in enumerate(query['ids'][0]):
+                if distances[i] > max_dist:
+                    break
+                entry = table()
+                entry.__dict__.update(metadatas[i])
+                entry.__dict__.update(id=id, embedding_source=documents[i], cosine_dist = distances[i])
+                results.append(entry)
+
+        return results
+
+    def retrieve_embedding(self, row_id: str, table: BaseClass) -> np.array:
+        collection = self.engine.get_collection(name=table.__name__)
+        all = collection.get(ids=[row_id], include=['embeddings'])
+
+        return np.array(all['embeddings'][0])
+
+    def create_tables(self):
+        return NotImplementedError("create_tables is not implemented")
+
+    def get_existing_row_ids(self, table: BaseClass):
+        collection = self.engine.get_collection(name=table.__name__)
+        all = collection.get(include=[])
+
+        return all['ids']
