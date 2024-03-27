@@ -185,6 +185,9 @@ class FAISS(Database):
             if expunge:
                 session.expunge_all()
 
+    def write_index(self):
+        raise NotImplementedError()
+
     def _create_engine(self):
         if self.database is None:
             return create_engine("sqlite+pysqlite:///:memory:", echo=self.verbose)
