@@ -1,3 +1,4 @@
+import copy
 import os
 from aenum import Enum, extend_enum
 import tiktoken
@@ -293,22 +294,42 @@ class OpenAi(Generator):
 
         return gen_response.choices[0].message.content
 
-    def chat(self, prompt: str) -> str:
+    def chat(self, prompt: str, stream: bool, n_history: int = 2, history: List[Dict] = None) -> str:
+
         self.history.add(Role.USER, prompt)
+
+        if history is None:
+            injection_history = self.history.get_content(last_n=n_history)
+        else:
+            injection_history = copy.deepcopy(history)
+            injection_history.extend(self.history.get_content(last_n=1))
+            injection_history = injection_history[-n_history:]
+
 
         gen_response = self.client.chat.completions.create(
             model=self.model.value,
-            messages=self.history.get_content(),
+            messages=injection_history,
             temperature=self.temperature,
             max_tokens=self.max_new_tokens,
             top_p=self.top_p,
             n=self.number_of_responses,
+            stream=stream
         )
 
-        content = gen_response.choices[0].message.content
-        self.history.add(Role.SYSTEM, content)
-        return content
+        if stream is False:
+            content = gen_response.choices[0].message.content
+            self.history.add(Role.SYSTEM, content)
+            return content
+        else:
+            history = ""
+            for chunk in gen_response:
+                chunk = chunk.choices[0].delta.content
+                if chunk is not None:
+                    history += chunk
 
+                yield(chunk)
+
+            self.history.add(Role.SYSTEM, history)
 
 class IGEL(Generator):
     """
@@ -411,8 +432,8 @@ class LLM:
         """
         return self.model.prompt(prompt)
 
-    def chat(self, prompt: str) -> str:
-        return self.model.chat(prompt)
+    def chat(self, prompt: str, stream: bool = False, n_history: int = 2, history: List[Dict] = None) -> str:
+        return self.model.chat(prompt, stream = stream, n_history = n_history, history = history)
 
     def new_chat(self):
         self.model.history.reset()
@@ -434,8 +455,13 @@ class ChatHistory:
     def reset(self):
         self._history = []
 
-    def get_content(self):
+    def get_content(self, last_n: int = 2):
+        last_n += 1 # the last one is the actual prompt, not history.
+        history = self._history[-last_n:]
+
         if self.model_name.family == "GPT":
-            return self._history
+            return history
         else:
-            return [f"{x['role']}: {x['content']}" for x in self._history]
+            return [f"{x['role']}: {x['content']}" for x in history]
+
+

@@ -23,6 +23,11 @@ be accessed anymore. The `expire_on_commit=False` parameter disables this behavi
 - Fixed a bug with which it was not possible to init the model without passing a auth token
 - IGEL now also accepts "IGEL_URL" to query the llm endpoint.
 
-## 0.1.4.2 -> 0.1.5
+## 0.1.4.2 -> 0.1.4.3
 - Closed issues [2](https://github.com/br-data/rag-tools-library/issues/2) and [10](https://github.com/br-data/rag-tools-library/issues/10)
 by considering the max_new_tokens param in the `fit_to_context_window()` method. 
+
+## 0.1.4.3 -> 0.1.5
+- Added tests for FAISS DB
+- Improve handling of History and Chat functionality
+	- TODO: Write Documentation for this point.
