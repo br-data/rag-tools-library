@@ -31,3 +31,6 @@ by considering the max_new_tokens param in the `fit_to_context_window()` method.
 - Added tests for FAISS DB
 - Improve handling of History and Chat functionality
 	- TODO: Write Documentation for this point.
+
+## 0.1.5 -> 0.1.5.1
+- Make dependencies a bit more forgiving.
