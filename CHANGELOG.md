@@ -34,3 +34,6 @@ by considering the max_new_tokens param in the `fit_to_context_window()` method.
 
 ## 0.1.5 -> 0.1.5.1
 - Make dependencies a bit more forgiving.
+
+## 0.1.5 -> 0.1.5.2
+- Fix typo and make versions allow all versions greater than.
